@@ -51,27 +51,29 @@
     <!-- Split Hero Section -->
     <section id="home" class="hero-section">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 hero-content" data-aos="fade-right">
-                    <span class="section-tag">Movies for Your Mood</span>
-                    <h1>Your Emotions,<br>Our AI Tool.</h1>
-                    <p class="lead text-muted mb-5">
-                        Experience a movie journey tailored to you. MoodAI uses smart AI to find the perfect movie for you based on how you feel.
-                    </p>
-                    <div class="d-flex">
-                        <button type="button" class="btn btn-premium btn-lg me-3" data-bs-toggle="modal" data-bs-target="#registerModal">Find My Mood</button>
-                        <a href="#how-it-works" class="btn btn-outline-premium btn-lg">See How it Works</a>
+            <div class="hero-card" data-aos="zoom-in">
+                <div class="row align-items-center p-5">
+                    <div class="col-lg-5 text-center position-relative mb-5 mb-lg-0" data-aos="fade-right">
+                        <!-- Decorative small icons -->
+                        <i class="bi bi-star-fill decorative-icon icon-1"></i>
+                        <i class="bi bi-film decorative-icon icon-2"></i>
+                        <i class="bi bi-heart-fill decorative-icon icon-3"></i>
+                        <i class="bi bi-play-circle-fill decorative-icon icon-4"></i>
+
+                        <!-- Large Main Icon -->
+                        <div class="large-hero-icon">
+                            <i class="bi bi-camera-reels"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left">
-                    <div class="hero-visual p-2">
-                        <div class="dashboard-mockup">
-                            <!-- Abstract Dashboard Elements -->
-                            <div class="mockup-element" style="width: 70%; height: 50%; top: 10%; left: 5%; border-color: #950101;"></div>
-                            <div class="mockup-element" style="width: 20%; height: 30%; bottom: 10%; left: 5%;"></div>
-                            <div class="mockup-element" style="width: 45%; height: 25%; bottom: 10%; right: 5%; border-color: var(--accent-red);"></div>
-                            <div class="mockup-element" style="width: 15%; height: 15%; top: 15%; right: 10%; border-radius: 50%; border-width: 2px;"></div>
-                            <i class="bi bi-cpu text-muted" style="font-size: 5rem; opacity: 0.2;"></i>
+                    <div class="col-lg-7 hero-content ps-lg-5" data-aos="fade-left">
+                        <span class="section-tag hero-tag">Movies for Your Mood</span>
+                        <h1 class="hero-title-text">Your Emotions,<br>Our AI Tool.</h1>
+                        <p class="lead hero-lead mb-5">
+                            Experience a movie journey tailored to you. MoodAI uses smart AI to find the perfect movie for you based on how you feel.
+                        </p>
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-hero-primary btn-lg me-3" data-bs-toggle="modal" data-bs-target="#registerModal">Find My Mood</button>
+                            <a href="#how-it-works" class="btn btn-hero-outline btn-lg">See How it Works</a>
                         </div>
                     </div>
                 </div>

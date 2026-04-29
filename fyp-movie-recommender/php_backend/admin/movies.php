@@ -25,18 +25,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $release_year = $_POST['release_year'];
                 $rating = $_POST['rating'];
                 $poster_url = $_POST['poster_url'];
+                $mood_ids = $_POST['mood_ids'] ?? [];
 
+                $pdo->beginTransaction();
                 if ($id) {
                     // Update
                     $stmt = $pdo->prepare("UPDATE admin_movies SET title=?, description=?, genre=?, language=?, release_year=?, rating=?, poster_url=? WHERE id=?");
                     $stmt->execute([$title, $description, $genre, $language, $release_year, $rating, $poster_url, $id]);
-                    $message = "Movie updated successfully!";
+
+                    // Update mappings
+                    $stmt = $pdo->prepare("DELETE FROM movie_mood_mapping WHERE movie_id = ?");
+                    $stmt->execute([$id]);
                 } else {
                     // Insert
                     $stmt = $pdo->prepare("INSERT INTO admin_movies (title, description, genre, language, release_year, rating, poster_url) VALUES (?, ?, ?, ?, ?, ?, ?)");
                     $stmt->execute([$title, $description, $genre, $language, $release_year, $rating, $poster_url]);
-                    $message = "Movie added to catalog!";
+                    $id = $pdo->lastInsertId();
                 }
+
+                if (!empty($mood_ids)) {
+                    $stmt = $pdo->prepare("INSERT INTO movie_mood_mapping (movie_id, mood_id) VALUES (?, ?)");
+                    foreach ($mood_ids as $mood_id) {
+                        $stmt->execute([$id, $mood_id]);
+                    }
+                }
+                $pdo->commit();
+                $message = "Movie and mood tags saved successfully!";
             } elseif ($_POST['action'] === 'delete') {
                 $id = $_POST['id'];
                 $stmt = $pdo->prepare("DELETE FROM admin_movies WHERE id=?");
@@ -44,14 +58,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = "Movie removed successfully.";
             }
         } catch (Exception $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
             $message = "Error: " . $e->getMessage();
             $message_type = 'danger';
         }
     }
 }
 
-// --- FETCH MOVIES ---
-$movies = $pdo->query("SELECT * FROM admin_movies ORDER BY created_at DESC")->fetchAll();
+// --- FETCH MOVIES WITH MOOD TAGS ---
+$movies = $pdo->query("
+    SELECT m.*, GROUP_CONCAT(mo.name SEPARATOR ', ') as mood_tags
+    FROM admin_movies m
+    LEFT JOIN movie_mood_mapping mapping ON m.id = mapping.movie_id
+    LEFT JOIN moods mo ON mapping.mood_id = mo.id
+    GROUP BY m.id
+    ORDER BY m.created_at DESC
+")->fetchAll();
+
+$all_moods = $pdo->query("SELECT * FROM moods ORDER BY name ASC")->fetchAll();
 
 ob_start();
 ?>
@@ -76,6 +100,7 @@ ob_start();
             <tr>
                 <th>Poster</th>
                 <th>Movie Info</th>
+                <th>Mood Tags</th>
                 <th>Genre/Lang</th>
                 <th>Rating</th>
                 <th class="text-end">Actions</th>
@@ -84,7 +109,7 @@ ob_start();
         <tbody>
             <?php if (empty($movies)): ?>
                 <tr>
-                    <td colspan="5" class="text-center py-5 text-muted">
+                    <td colspan="6" class="text-center py-5 text-muted">
                         <i class="bi bi-film display-4 d-block mb-3 opacity-25"></i>
                         No curated movies found. Start by adding one!
                     </td>
@@ -98,6 +123,17 @@ ob_start();
                         <td>
                             <div class="fw-bold text-white"><?php echo htmlspecialchars($movie['title']); ?></div>
                             <div class="small text-muted"><?php echo $movie['release_year']; ?></div>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1">
+                                <?php if($movie['mood_tags']): ?>
+                                    <?php foreach(explode(', ', $movie['mood_tags']) as $tag): ?>
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size: 0.65rem;"><?php echo htmlspecialchars($tag); ?></span>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <span class="text-muted small">No tags</span>
+                                <?php endif; ?>
+                            </div>
                         </td>
                         <td>
                             <span class="badge bg-dark border border-secondary"><?php echo htmlspecialchars($movie['genre']); ?></span>
@@ -164,10 +200,23 @@ ob_start();
                             <input type="number" step="0.1" name="rating" id="rating" class="form-control bg-black border-secondary text-white" required>
                         </div>
                         <div class="col-md-12">
+                            <label class="form-label small text-muted">Mood Tags (Select all that apply)</label>
+                            <div class="d-flex flex-wrap gap-3 p-3 bg-black rounded border border-secondary">
+                                <?php foreach($all_moods as $mood): ?>
+                                    <div class="form-check">
+                                        <input class="form-check-input mood-checkbox" type="checkbox" name="mood_ids[]" value="<?php echo $mood['id']; ?>" id="mood_check_<?php echo $mood['id']; ?>">
+                                        <label class="form-check-label small" for="mood_check_<?php echo $mood['id']; ?>">
+                                            <?php echo htmlspecialchars($mood['name']); ?>
+                                        </label>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
                             <label class="form-label small text-muted">Poster URL</label>
                             <input type="url" name="poster_url" id="poster_url" class="form-control bg-black border-secondary text-white" placeholder="https://..." required onchange="previewPoster(this.value)">
-                            <div class="mt-2">
-                                <img id="poster_preview" src="" class="rounded" style="max-height: 150px; display: none;">
+                            <div class="mt-2 text-center">
+                                <img id="poster_preview" src="" class="rounded" style="max-height: 180px; display: none; border: 1px solid var(--admin-glass-border);">
                             </div>
                         </div>
                     </div>
@@ -193,6 +242,9 @@ function openAddModal() {
     document.getElementById('rating').value = '7.5';
     document.getElementById('poster_url').value = '';
     document.getElementById('poster_preview').style.display = 'none';
+
+    // Uncheck all moods
+    document.querySelectorAll('.mood-checkbox').forEach(cb => cb.checked = false);
 }
 
 function openEditModal(movie) {
@@ -207,6 +259,18 @@ function openEditModal(movie) {
     document.getElementById('poster_url').value = movie.poster_url;
     previewPoster(movie.poster_url);
 
+    // Handle mood checkboxes
+    document.querySelectorAll('.mood-checkbox').forEach(cb => cb.checked = false);
+    if (movie.mood_tags) {
+        const tags = movie.mood_tags.split(', ');
+        document.querySelectorAll('.mood-checkbox').forEach(cb => {
+            const moodName = cb.nextElementSibling.innerText.trim();
+            if (tags.includes(moodName)) {
+                cb.checked = true;
+            }
+        });
+    }
+
     var modal = new bootstrap.Modal(document.getElementById('movieModal'));
     modal.show();
 }
@@ -215,7 +279,7 @@ function previewPoster(url) {
     const img = document.getElementById('poster_preview');
     if (url) {
         img.src = url;
-        img.style.display = 'block';
+        img.style.display = 'inline-block';
     } else {
         img.style.display = 'none';
     }

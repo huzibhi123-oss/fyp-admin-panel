@@ -23,6 +23,21 @@ function render_admin_layout($content, $title = "Dashboard", $active_page = "das
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="../assets/css/admin.css">
 
+    <?php
+    // Inject Dynamic Theme Color
+    global $pdo;
+    $theme_color = $pdo->query("SELECT setting_value FROM admin_settings WHERE setting_key = 'theme_color'")->fetchColumn() ?: '#950101';
+    ?>
+    <style>
+        :root { --admin-primary: <?php echo $theme_color; ?>; }
+        @media (max-width: 991.98px) {
+            .admin-sidebar { transform: translateX(-100%); }
+            .admin-sidebar.show { transform: translateX(0); }
+            .admin-main { margin-left: 0; }
+            .admin-navbar { padding: 0 1rem; }
+        }
+    </style>
+
     <!-- Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -71,7 +86,10 @@ function render_admin_layout($content, $title = "Dashboard", $active_page = "das
     <!-- Main Content Area -->
     <main class="admin-main">
         <header class="admin-navbar">
-            <div class="admin-nav-left">
+            <div class="admin-nav-left d-flex align-items-center">
+                <button class="btn btn-link text-white d-lg-none me-2 p-0" onclick="document.querySelector('.admin-sidebar').classList.toggle('show')">
+                    <i class="bi bi-list fs-3"></i>
+                </button>
                 <h5 class="mb-0 fw-bold"><?php echo $title; ?></h5>
             </div>
             <div class="admin-nav-right d-flex align-items-center">

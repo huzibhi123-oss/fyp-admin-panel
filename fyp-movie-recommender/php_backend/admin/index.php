@@ -127,19 +127,17 @@ ob_start();
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Mood Activity Chart
+    // Mood Activity Chart (Bar Chart as requested)
     const moodCtx = document.getElementById('moodChart').getContext('2d');
     new Chart(moodCtx, {
-        type: 'line',
+        type: 'bar',
         data: {
             labels: <?php echo $chart_labels; ?>,
             datasets: [{
-                label: 'AI Mood Detections',
+                label: 'Daily Detections',
                 data: <?php echo $chart_data; ?>,
-                borderColor: '#950101',
-                backgroundColor: 'rgba(149, 1, 1, 0.1)',
-                tension: 0.4,
-                fill: true
+                backgroundColor: '#950101',
+                borderRadius: 5
             }]
         },
         options: {
@@ -153,16 +151,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Mood Distribution Chart
+    // Mood Distribution Chart (Pie Chart as requested)
     const genreCtx = document.getElementById('genreChart').getContext('2d');
     new Chart(genreCtx, {
-        type: 'doughnut',
+        type: 'pie',
         data: {
             labels: <?php echo $pie_labels; ?>,
             datasets: [{
                 data: <?php echo $pie_data; ?>,
                 backgroundColor: ['#950101', '#3D0000', '#6F0000', '#B30101', '#FF0000', '#222'],
-                borderWidth: 0
+                borderColor: 'rgba(0,0,0,0.5)',
+                borderWidth: 2
             }]
         },
         options: {
@@ -171,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
             plugins: {
                 legend: {
                     position: 'bottom',
-                    labels: { color: '#888', padding: 20 }
+                    labels: { color: '#888', padding: 20, font: { size: 10 } }
                 }
             }
         }

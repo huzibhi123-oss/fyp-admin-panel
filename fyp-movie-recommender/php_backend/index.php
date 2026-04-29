@@ -27,14 +27,14 @@ if (file_exists('includes/config.php')) {
 // Fallback if no movies found or DB connection fails
 if (empty($marquee_movies)) {
     $marquee_movies = [
-        ['title' => 'Inception', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/o0I0Bh0CDXvC4sPjrT5p4JuZZ6C.jpg'],
-        ['title' => 'The Dark Knight', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/qJ2tW6WMUDp92SKyYw9ebSOb9pf.jpg'],
-        ['title' => 'Interstellar', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/gEU2QniE6E77NI6lCU6MxlSaba7.jpg'],
-        ['title' => 'Pulp Fiction', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/d5iIl9h9btztp90Y0YhURvrOIPr.jpg'],
-        ['title' => 'The Matrix', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/f89U3Y9L9uHMD5RSSTrO36SST1M.jpg'],
-        ['title' => 'Gladiator', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/ty87FpccpUfsRsHn2O12XpgmOQH.jpg'],
-        ['title' => 'The Prestige', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/bdN3g9er99Y7Yp9Z7SFCp9LNu9p.jpg'],
-        ['title' => 'Whiplash', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/7vqiByE8Szw6Bx4v96P68Fm99u9.jpg']
+        ['title' => 'Top Gun: Maverick', 'poster_path' => '/62HCnUTziyWcpDaBO2i1DX17ljH.jpg'],
+        ['title' => 'Jurassic World Dominion', 'poster_path' => '/kAVRgw7GgK1CfYEJq8ME6EvRIgU.jpg'],
+        ['title' => 'Everything Everywhere All at Once', 'poster_path' => '/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg'],
+        ['title' => 'The Northman', 'poster_path' => '/zhLKlUaF1SEpO58ppHIAyENkwgw.jpg'],
+        ['title' => 'Lightyear', 'poster_path' => '/ox4goZd956BxqJH6iLwhWPL9ct4.jpg'],
+        ['title' => 'Spiderhead', 'poster_path' => '/5hTK0J9SGPLSTFwcbU0ELlJsnAY.jpg'],
+        ['title' => 'Interceptor', 'poster_path' => '/cpWUtkcgRKeauhTyVMjYHxAutp4.jpg'],
+        ['title' => 'Black Adam', 'poster_path' => '/pFlaoHTZeyNkG83vxsAJiGzfSsa.jpg']
     ];
 }
 ?>
@@ -183,15 +183,24 @@ if (empty($marquee_movies)) {
                         // Duplicate movies to ensure seamless loop
                         $loop_movies = array_merge($marquee_movies, $marquee_movies);
                         foreach ($loop_movies as $movie):
-                            $poster_path = $movie['poster_path'];
+                            $poster_path = $movie['poster_path'] ?? '';
+                            if (empty($poster_path)) continue;
+
                             if (strpos($poster_path, 'http') === false) {
+                                // Ensure leading slash
+                                if ($poster_path[0] !== '/') {
+                                    $poster_path = '/' . $poster_path;
+                                }
                                 $poster = "https://image.tmdb.org/t/p/w500" . $poster_path;
                             } else {
                                 $poster = $poster_path;
                             }
                         ?>
                             <div class="movie-glass-card">
-                                <img src="<?php echo htmlspecialchars($poster); ?>" alt="<?php echo htmlspecialchars($movie['title']); ?>" loading="lazy">
+                                <img src="<?php echo htmlspecialchars($poster); ?>"
+                                     alt="<?php echo htmlspecialchars($movie['title']); ?>"
+                                     loading="lazy"
+                                     onerror="this.parentElement.style.background='#1a1a1a'; this.style.opacity='0';">
                                 <div class="glass-overlay"></div>
                             </div>
                         <?php endforeach; ?>

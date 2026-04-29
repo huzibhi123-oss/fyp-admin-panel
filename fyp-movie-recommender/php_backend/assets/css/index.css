@@ -256,7 +256,7 @@ section {
 .movie-marquee-section {
     background: linear-gradient(180deg, var(--bg-black) 0%, #050505 50%, var(--bg-black) 100%);
     padding: 80px 0;
-    min-height: 600px; /* Ensure enough space */
+    min-height: 500px; /* Ensure enough space */
 }
 
 .marquee-wrapper {
@@ -265,18 +265,19 @@ section {
     overflow: hidden;
     user-select: none;
     background: rgba(255, 255, 255, 0.02);
+    /* Soften the mask to ensure images aren't cut off too early */
     -webkit-mask-image: linear-gradient(
         to right,
         transparent,
-        black 15%,
-        black 85%,
+        black 5%,
+        black 95%,
         transparent
     );
     mask-image: linear-gradient(
         to right,
         transparent,
-        black 15%,
-        black 85%,
+        black 5%,
+        black 95%,
         transparent
     );
 }
@@ -285,10 +286,11 @@ section {
     display: flex;
     gap: 30px;
     padding: 40px 0;
+    width: max-content;
 }
 
 .marquee-left {
-    animation: scrollLeft 60s linear infinite;
+    animation: scrollLeft 80s linear infinite;
 }
 
 .marquee-wrapper:hover .marquee-content {
@@ -307,18 +309,33 @@ section {
     border-radius: 24px;
     position: relative;
     overflow: hidden;
-    background: rgba(255, 255, 255, 0.03);
+    background: #0a0a0a; /* Dark placeholder */
     backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.movie-glass-card::after {
+    content: '\F32C'; /* bi-film icon as placeholder */
+    font-family: 'bootstrap-icons';
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.05);
+    position: absolute;
+    z-index: 0;
 }
 
 .movie-glass-card img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s ease;
+    transition: transform 0.6s ease, opacity 0.3s ease;
+    position: relative;
+    z-index: 1;
+    display: block;
 }
 
 .glass-overlay {

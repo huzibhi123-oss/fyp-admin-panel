@@ -73,7 +73,21 @@ if (!$is_guest) {
                     <?php endforeach; ?>
                 </ul>
                 
-                <div class="d-flex">
+                <div class="d-flex gap-2">
+                    <?php if (!$is_guest): ?>
+                        <?php
+                        // Quick check for admin role
+                        try {
+                            $is_admin_check = $pdo->prepare("SELECT role FROM users WHERE user_id = ?");
+                            $is_admin_check->execute([$_SESSION['user_id']]);
+                            if ($is_admin_check->fetchColumn() === 'admin'): ?>
+                                <a class="btn btn-outline-premium border-0" href="admin/index.php" title="Admin Panel">
+                                    <i class="bi bi-speedometer2"></i>
+                                </a>
+                            <?php endif;
+                        } catch (Exception $e) {}
+                        ?>
+                    <?php endif; ?>
                     <a class="btn btn-logout" href="logout.php">
                         <?php echo $is_guest ? 'Exit Guest' : 'Logout'; ?>
                     </a>

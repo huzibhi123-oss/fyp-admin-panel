@@ -22,12 +22,52 @@ if (!$user_id || !$last_detected_mood) {
     header("Location: dashboard.php");
     exit();
 }
-// --- Recommendation Logic ---
+// --- Recommendation Logic & Settings ---
 $target_genre_id = get_genre_id_for_mood($last_detected_mood);
 $recommended_movies = [];
 $api_error = null;
 $data_source = "Live Cloud";
 
+// Fetch Admin Settings
+$settings = $pdo->query("SELECT * FROM admin_settings")->fetchAll(PDO::FETCH_KEY_PAIR);
+$limit = (int)($settings['recommendation_count'] ?? 10);
+$logic = $settings['recommendation_logic'] ?? 'top-rated';
+
+// 1. ATTEMPT TO FETCH ADMIN-CURATED MOVIES FIRST
+try {
+    $curated_query = "
+        SELECT m.id, m.title, m.rating as vote_average, m.description as overview, m.poster_url as poster_path
+        FROM admin_movies m
+        JOIN movie_mood_mapping mapping ON m.id = mapping.movie_id
+        JOIN moods mo ON mapping.mood_id = mo.id
+        WHERE mo.name = :mood
+    ";
+
+    if ($logic === 'top-rated') {
+        $curated_query .= " ORDER BY m.rating DESC";
+    } elseif ($logic === 'recent') {
+        $curated_query .= " ORDER BY m.created_at DESC";
+    } else {
+        $curated_query .= " ORDER BY RAND()";
+    }
+
+    $curated_query .= " LIMIT :limit";
+
+    $stmt = $pdo->prepare($curated_query);
+    $stmt->bindValue(':mood', $last_detected_mood, PDO::PARAM_STR);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+    $recommended_movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($recommended_movies)) {
+        $data_source = "Admin Curated";
+    }
+} catch (Exception $e) {
+    // Fail silently to TMDB if curated fails
+}
+
+// 2. FALLBACK TO TMDB IF NO CURATED MOVIES FOUND
+if (empty($recommended_movies)) {
 // --- CALL TMDB API ---
 $endpoint = TMDB_BASE_URL . 'discover/movie';
 $params = [
@@ -51,6 +91,7 @@ if ($current_region === 'Bollywood') {
     $params['with_original_language'] = 'en';
 }
 
+    $params['page'] = 1; // Always page 1 for initial mood match
 $query_url = $endpoint . '?' . http_build_query($params);
 
 $ch = curl_init();
@@ -136,6 +177,11 @@ if ($http_code === 200 && $response) {
     } catch (Exception $e) {
         $api_error = "System Error: " . $e->getMessage();
     }
+}
+
+// Apply Global Limit from Admin Settings to final result
+if (count($recommended_movies) > $limit) {
+    $recommended_movies = array_slice($recommended_movies, 0, $limit);
 }
 
 // --- Include UI Components ---

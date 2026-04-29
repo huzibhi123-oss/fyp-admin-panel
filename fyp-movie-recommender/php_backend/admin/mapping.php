@@ -52,18 +52,18 @@ foreach ($maps as $m) {
 ob_start();
 ?>
 
-<div class="mb-4">
+<div class="mb-4" data-aos="fade-down">
     <h4 class="fw-bold mb-1">Mood ↔ Movie Mapping</h4>
     <p class="text-muted small">Curate exactly which movies appear for each detected mood.</p>
 </div>
 
 <?php if ($message): ?>
-    <div class="alert alert-success border-0 shadow-sm mb-4"><?php echo $message; ?></div>
+    <div class="alert alert-success border-0 shadow-sm mb-4" data-aos="zoom-in"><?php echo $message; ?></div>
 <?php endif; ?>
 
 <div class="row g-4">
-    <?php foreach ($moods as $mood): ?>
-        <div class="col-lg-6">
+    <?php foreach ($moods as $index => $mood): ?>
+        <div class="col-lg-6" data-aos="fade-up" data-aos-delay="<?php echo $index * 100; ?>">
             <div class="admin-card">
                 <div class="d-flex align-items-center mb-4">
                     <div class="stat-icon bg-danger bg-opacity-10 text-danger me-3 mb-0" style="width: 40px; height: 40px;">

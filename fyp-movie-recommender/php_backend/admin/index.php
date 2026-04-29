@@ -56,7 +56,7 @@ ob_start();
 ?>
 
 <div class="row g-4 mb-5">
-    <div class="col-md-3">
+    <div class="col-md-3" data-aos="fade-up">
         <div class="admin-card">
             <div class="stat-icon bg-primary bg-opacity-10 text-primary">
                 <i class="bi bi-people"></i>
@@ -68,7 +68,7 @@ ob_start();
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
         <div class="admin-card">
             <div class="stat-icon bg-danger bg-opacity-10 text-danger">
                 <i class="bi bi-film"></i>
@@ -80,7 +80,7 @@ ob_start();
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
         <div class="admin-card">
             <div class="stat-icon bg-warning bg-opacity-10 text-warning">
                 <i class="bi bi-cpu"></i>
@@ -92,7 +92,7 @@ ob_start();
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3" data-aos="fade-up" data-aos-delay="300">
         <div class="admin-card">
             <div class="stat-icon bg-success bg-opacity-10 text-success">
                 <i class="bi bi-heart"></i>
@@ -107,7 +107,7 @@ ob_start();
 </div>
 
 <div class="row g-4">
-    <div class="col-lg-8">
+    <div class="col-lg-8" data-aos="fade-right" data-aos-delay="400">
         <div class="admin-card">
             <h5 class="fw-bold mb-4">AI Detection Activity (Last 7 Days)</h5>
             <div style="height: 300px;">
@@ -115,7 +115,7 @@ ob_start();
             </div>
         </div>
     </div>
-    <div class="col-lg-4">
+    <div class="col-lg-4" data-aos="fade-left" data-aos-delay="400">
         <div class="admin-card">
             <h5 class="fw-bold mb-4">Mood Distribution</h5>
             <div style="height: 300px;">

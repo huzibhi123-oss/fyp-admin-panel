@@ -43,7 +43,7 @@ $moods = $pdo->query("SELECT * FROM moods ORDER BY name ASC")->fetchAll();
 ob_start();
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
     <h4 class="fw-bold mb-0">Mood Management</h4>
     <button class="btn btn-admin-primary" data-bs-toggle="modal" data-bs-target="#moodModal" onclick="clearMoodForm()">
         <i class="bi bi-plus-lg me-2"></i> Define New Mood
@@ -51,12 +51,12 @@ ob_start();
 </div>
 
 <?php if ($message): ?>
-    <div class="alert alert-success border-0 shadow-sm mb-4"><?php echo $message; ?></div>
+    <div class="alert alert-success border-0 shadow-sm mb-4" data-aos="zoom-in"><?php echo $message; ?></div>
 <?php endif; ?>
 
 <div class="row g-4">
-    <?php foreach ($moods as $mood): ?>
-        <div class="col-md-6 col-lg-4">
+    <?php foreach ($moods as $index => $mood): ?>
+        <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="<?php echo $index * 100; ?>">
             <div class="admin-card h-100">
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <h5 class="fw-bold text-white mb-0"><?php echo htmlspecialchars($mood['name']); ?></h5>

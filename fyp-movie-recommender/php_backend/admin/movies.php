@@ -80,7 +80,7 @@ $all_moods = $pdo->query("SELECT * FROM moods ORDER BY name ASC")->fetchAll();
 ob_start();
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
     <h4 class="fw-bold mb-0">Curated Movies Catalog</h4>
     <button class="btn btn-admin-primary" data-bs-toggle="modal" data-bs-target="#movieModal" onclick="openAddModal()">
         <i class="bi bi-plus-lg me-2"></i> Add New Movie
@@ -88,13 +88,13 @@ ob_start();
 </div>
 
 <?php if ($message): ?>
-    <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show border-0 shadow-sm" role="alert">
+    <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show border-0 shadow-sm" role="alert" data-aos="zoom-in">
         <?php echo $message; ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 <?php endif; ?>
 
-<div class="admin-table-container">
+<div class="admin-table-container" data-aos="fade-up">
     <table class="table admin-table">
         <thead>
             <tr>

@@ -12,6 +12,16 @@ if (!function_exists('set_page_title')) {
 
 $default_title = "MoodAI | Neural Recommendation System";
 $page_title = $page_title ?? $default_title;
+
+// Fetch System Settings for Global Use
+try {
+    $system_settings = $pdo->query("SELECT * FROM admin_settings")->fetchAll(PDO::FETCH_KEY_PAIR);
+    $app_display_name = $system_settings['app_name'] ?? 'MoodAI';
+    $app_theme_color = $system_settings['theme_color'] ?? '#950101';
+} catch (Exception $e) {
+    $app_display_name = 'MoodAI';
+    $app_theme_color = '#950101';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -30,6 +40,14 @@ $page_title = $page_title ?? $default_title;
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        :root {
+            --accent-red: <?php echo $app_theme_color; ?>;
+            --deep-red: <?php echo $app_theme_color; ?>;
+            --maroon: <?php echo $app_theme_color; ?>dd; /* Slight transparency */
+        }
+    </style>
 </head>
 <body>
 
@@ -53,7 +71,14 @@ if (!$is_guest) {
     <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
             <a class="navbar-brand" href="dashboard.php">
-                Mood<span>AI</span>.
+                <?php
+                    // Support for the "MoodAI" span style even if name changes
+                    if ($app_display_name === 'MoodAI') {
+                        echo 'Mood<span>AI</span>.';
+                    } else {
+                        echo htmlspecialchars($app_display_name);
+                    }
+                ?>
             </a>
             
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -73,7 +98,21 @@ if (!$is_guest) {
                     <?php endforeach; ?>
                 </ul>
                 
-                <div class="d-flex">
+                <div class="d-flex gap-2">
+                    <?php if (!$is_guest): ?>
+                        <?php
+                        // Quick check for admin role
+                        try {
+                            $is_admin_check = $pdo->prepare("SELECT role FROM users WHERE user_id = ?");
+                            $is_admin_check->execute([$_SESSION['user_id']]);
+                            if ($is_admin_check->fetchColumn() === 'admin'): ?>
+                                <a class="btn btn-outline-premium border-0" href="admin/index.php" title="Admin Panel">
+                                    <i class="bi bi-speedometer2"></i>
+                                </a>
+                            <?php endif;
+                        } catch (Exception $e) {}
+                        ?>
+                    <?php endif; ?>
                     <a class="btn btn-logout" href="logout.php">
                         <?php echo $is_guest ? 'Exit Guest' : 'Logout'; ?>
                     </a>

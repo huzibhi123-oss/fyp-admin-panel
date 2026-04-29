@@ -1,5 +1,42 @@
 <?php
 // index.php - Premium Redesign for MoodAI Recommendation System
+
+// Fetch movies for the marquee
+$marquee_movies = [];
+
+// Fetch DB config manually to avoid die() in connection.php
+if (file_exists('includes/config.php')) {
+    @include_once 'includes/config.php';
+    if (defined('DB_HOST') && defined('DB_NAME')) {
+        try {
+            $pdo_marquee = new PDO(
+                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+                DB_USER,
+                DB_PASS,
+                [PDO::ATTR_TIMEOUT => 2]
+            );
+            $stmt = $pdo_marquee->prepare("SELECT poster_path, title FROM catched_movies ORDER BY RAND() LIMIT 20");
+            $stmt->execute();
+            $marquee_movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $marquee_movies = [];
+        }
+    }
+}
+
+// Fallback if no movies found or DB connection fails
+if (empty($marquee_movies)) {
+    $marquee_movies = [
+        ['title' => 'Inception', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/o0I0Bh0CDXvC4sPjrT5p4JuZZ6C.jpg'],
+        ['title' => 'The Dark Knight', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/qJ2tW6WMUDp92SKyYw9ebSOb9pf.jpg'],
+        ['title' => 'Interstellar', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/gEU2QniE6E77NI6lCU6MxlSaba7.jpg'],
+        ['title' => 'Pulp Fiction', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/d5iIl9h9btztp90Y0YhURvrOIPr.jpg'],
+        ['title' => 'The Matrix', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/f89U3Y9L9uHMD5RSSTrO36SST1M.jpg'],
+        ['title' => 'Gladiator', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/ty87FpccpUfsRsHn2O12XpgmOQH.jpg'],
+        ['title' => 'The Prestige', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/bdN3g9er99Y7Yp9Z7SFCp9LNu9p.jpg'],
+        ['title' => 'Whiplash', 'poster_path' => 'https://www.themoviedb.org/t/p/w600_and_h900_bestv2/7vqiByE8Szw6Bx4v96P68Fm99u9.jpg']
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -7,17 +44,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MoodAI | Premium Mood-Based Movie Recommendations</title>
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- CSS Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/index.css">
@@ -88,7 +125,7 @@
                 <span class="section-tag">What We Can Do</span>
                 <h2 class="section-title-premium">Smart Mood Tools</h2>
             </div>
-            
+
             <div class="bento-container">
                 <!-- Large Feature -->
                 <div class="bento-1" data-aos="zoom-in">
@@ -127,6 +164,44 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Movie Marquee Section -->
+    <section class="movie-marquee-section py-5 overflow-hidden">
+        <div class="container-fluid px-0">
+            <div class="text-center mb-5">
+                <span class="section-tag">Cinematic Library</span>
+                <h2 class="section-title-premium text-white">Our Curated Collection</h2>
+            </div>
+
+            <?php if (!empty($marquee_movies)): ?>
+                <!-- Single Row Marquee as requested -->
+                <div class="marquee-wrapper">
+                    <div class="marquee-content marquee-left">
+                        <?php
+                        // Duplicate movies to ensure seamless loop
+                        $loop_movies = array_merge($marquee_movies, $marquee_movies);
+                        foreach ($loop_movies as $movie):
+                            $poster_path = $movie['poster_path'];
+                            if (strpos($poster_path, 'http') === false) {
+                                $poster = "https://image.tmdb.org/t/p/w500" . $poster_path;
+                            } else {
+                                $poster = $poster_path;
+                            }
+                        ?>
+                            <div class="movie-glass-card">
+                                <img src="<?php echo htmlspecialchars($poster); ?>" alt="<?php echo htmlspecialchars($movie['title']); ?>" loading="lazy">
+                                <div class="glass-overlay"></div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="text-center text-muted">
+                    <p>Updating cinematic library...</p>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -229,7 +304,7 @@
                     <div class="text-start mb-4">
                         <h4 class="fw-bold mb-1 logo-text">MoodAI<span>.</span></h4>
                     </div>
-                    
+
                     <h2 class="login-title text-white">Welcome Back</h2>
                     <p class="login-subtitle">Login to get your movie recommendations.</p>
 
@@ -242,14 +317,14 @@
                         <label class="form-label-custom">Email</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-envelope"></i></span>
-                            <input type="email" class="form-control" id="email" name="email" 
+                            <input type="email" class="form-control" id="email" name="email"
                                     placeholder="Email Address" required>
                         </div>
 
                         <label class="form-label-custom">Password</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-lock"></i></span>
-                            <input type="password" class="form-control" id="password" name="password" 
+                            <input type="password" class="form-control" id="password" name="password"
                                     placeholder="Password" required>
                             <button class="toggle-password-btn" type="button" data-target="password">
                                 <i class="bi bi-eye"></i>
@@ -280,7 +355,7 @@
                     <div class="text-start mb-4">
                         <h4 class="fw-bold mb-1 logo-text">MoodAI<span>.</span></h4>
                     </div>
-                    
+
                     <h2 class="register-title text-white">Join Us</h2>
                     <p class="register-subtitle">Create your profile to find movies for your mood.</p>
 
@@ -293,21 +368,21 @@
                         <label class="form-label-custom">Your Name</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-person-circle"></i></span>
-                            <input type="text" class="form-control" id="reg_name" name="name" 
+                            <input type="text" class="form-control" id="reg_name" name="name"
                                     placeholder="Enter your name" required>
                         </div>
-                        
+
                         <label class="form-label-custom">Email Address</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-envelope"></i></span>
-                            <input type="email" class="form-control" id="reg_email" name="email" 
+                            <input type="email" class="form-control" id="reg_email" name="email"
                                     placeholder="Email Address" required>
                         </div>
 
                         <label class="form-label-custom">Password</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-lock"></i></span>
-                            <input type="password" class="form-control" id="reg_password" name="password" 
+                            <input type="password" class="form-control" id="reg_password" name="password"
                                     placeholder="8+ characters" required>
                             <button class="toggle-password-btn" type="button" data-target="reg_password">
                                 <i class="bi bi-eye"></i>
@@ -317,7 +392,7 @@
                         <label class="form-label-custom">Confirm Password</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-shield-lock"></i></span>
-                            <input type="password" class="form-control" id="reg_confirm_password" name="confirm_password" 
+                            <input type="password" class="form-control" id="reg_confirm_password" name="confirm_password"
                                     placeholder="Re-enter Password" required>
                             <button class="toggle-password-btn" type="button" data-target="reg_confirm_password">
                                 <i class="bi bi-eye"></i>
@@ -374,20 +449,16 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Automatically log in or show success and switch to login modal
-                    // For now, let's redirect to dashboard if the backend does auto-login, 
-                    // or just redirect to login (which is now a modal, so maybe just show success message)
                     if (data.redirect) {
                         window.location.href = data.redirect;
                     } else {
-                        // Registration successful, show success in login modal and switch
                         const loginAlert = document.getElementById('loginAlert');
                         const loginError = document.getElementById('loginErrorMessage');
-                        
+
                         loginAlert.classList.remove('alert-danger', 'd-none');
                         loginAlert.classList.add('alert-success');
                         loginError.textContent = data.message;
-                        
+
                         bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
                         new bootstrap.Modal(document.getElementById('loginModal')).show();
                     }

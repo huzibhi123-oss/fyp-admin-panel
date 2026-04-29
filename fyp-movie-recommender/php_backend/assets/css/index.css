@@ -252,6 +252,108 @@ section {
     border-left: 3px solid var(--accent-red);
 }
 
+/* --- Movie Marquee --- */
+.movie-marquee-section {
+    background: linear-gradient(180deg, var(--bg-black) 0%, #050505 50%, var(--bg-black) 100%);
+    padding: 80px 0;
+    min-height: 600px; /* Ensure enough space */
+}
+
+.marquee-wrapper {
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+    user-select: none;
+    background: rgba(255, 255, 255, 0.02);
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 15%,
+        black 85%,
+        transparent
+    );
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 15%,
+        black 85%,
+        transparent
+    );
+}
+
+.marquee-content {
+    display: flex;
+    gap: 30px;
+    padding: 40px 0;
+}
+
+.marquee-left {
+    animation: scrollLeft 60s linear infinite;
+}
+
+.marquee-wrapper:hover .marquee-content {
+    animation-play-state: paused;
+}
+
+@keyframes scrollLeft {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-50% - 15px)); }
+}
+
+.movie-glass-card {
+    width: 240px;
+    height: 360px;
+    flex-shrink: 0;
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.movie-glass-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+
+.glass-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(255, 0, 0, 0.1) 100%
+    );
+    pointer-events: none;
+}
+
+.movie-glass-card:hover {
+    transform: translateY(-15px) scale(1.05);
+    border-color: var(--accent-red);
+    background: rgba(255, 0, 0, 0.05);
+    box-shadow: 0 20px 50px rgba(255, 0, 0, 0.2);
+}
+
+.movie-glass-card:hover img {
+    transform: scale(1.1);
+}
+
+.movie-glass-card:hover .glass-overlay {
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(255, 0, 0, 0.3) 100%
+    );
+}
+
 /* --- Footer --- */
 footer {
     border-top: var(--border-thin);

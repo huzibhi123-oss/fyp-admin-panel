@@ -16,17 +16,28 @@ require_once 'database/connection.php';
 
 // Fetch stats for the Overview bar
 try {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM user_mood_history WHERE user_id = :uid");
-    $stmt->execute(['uid' => $user_id]);
-    $total_detections = $stmt->fetchColumn();
+    // If it's a real user, fetch from DB
+    if (!isset($_SESSION['is_guest']) || !$_SESSION['is_guest']) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM user_mood_history WHERE user_id = :uid");
+        $stmt->execute(['uid' => $user_id]);
+        $total_detections = $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM user_favorites WHERE user_id = :uid");
-    $stmt->execute(['uid' => $user_id]);
-    $total_favorites = $stmt->fetchColumn();
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM user_favorites WHERE user_id = :uid");
+        $stmt->execute(['uid' => $user_id]);
+        $total_favorites = $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT mood as detected_mood, input_type as type, detected_at as created_at FROM user_mood_history WHERE user_id = :uid ORDER BY detected_at DESC LIMIT 3");
-    $stmt->execute(['uid' => $user_id]);
-    $recent_activity = $stmt->fetchAll();
+        $stmt = $pdo->prepare("SELECT mood as detected_mood, input_type as type, detected_at as created_at FROM user_mood_history WHERE user_id = :uid ORDER BY detected_at DESC LIMIT 3");
+    } else {
+        // Guest defaults
+        $total_detections = 0;
+        $total_favorites = 0;
+        $recent_activity = [];
+    }
+
+    if (isset($stmt)) {
+        $stmt->execute(['uid' => $user_id]);
+        $recent_activity = $stmt->fetchAll();
+    }
 
 } catch (Exception $e) {
     $total_detections = 0;
@@ -45,7 +56,7 @@ set_page_title("MoodAI | Your Dashboard");
     <section class="hero-section dashboard-hero-section mb-4">
         <div class="container px-0">
             <div class="hero-card" data-aos="zoom-in">
-                <div class="row align-items-center p-5">
+                <div class="row align-items-center p-4">
                     <div class="col-lg-5 text-center position-relative mb-5 mb-lg-0" data-aos="fade-right">
                         <!-- Decorative small icons -->
                         <i class="bi bi-star-fill decorative-icon icon-1"></i>

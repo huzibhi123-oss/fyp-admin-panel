@@ -512,11 +512,13 @@ main {
 
 /* --- Hero Section (Shared) --- */
 .hero-section {
-    padding: 40px 0;
+    padding: 20px 0;
     min-height: auto;
     display: flex;
     align-items: center;
-    margin-top: 50px; /* Clear header */
+    margin-top: 100px; /* Significant gap to avoid overlapping with sticky header */
+    position: relative;
+    z-index: 1;
 }
 
 .hero-card {
@@ -527,6 +529,8 @@ main {
     overflow: hidden;
     box-shadow: 0 25px 50px -12px rgba(255, 0, 0, 0.25);
     border: 2px solid transparent;
+    max-width: 1000px; /* Limit size */
+    margin: 0 auto; /* Center it */
 }
 
 .hero-card:hover {
@@ -536,10 +540,10 @@ main {
 }
 
 .hero-title-text {
-    font-size: 4.5rem;
+    font-size: 2.8rem; /* Reduced size as requested */
     font-weight: 800;
     line-height: 1.1;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     color: var(--text-white);
 }
 

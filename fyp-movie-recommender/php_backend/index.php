@@ -184,10 +184,9 @@ if (empty($marquee_movies)) {
                         $loop_movies = array_merge($marquee_movies, $marquee_movies);
                         foreach ($loop_movies as $movie):
                             $poster_path = $movie['poster_path'] ?? '';
-                            if (empty($poster_path)) continue;
+                            $title = $movie['title'] ?? 'Unknown Movie';
 
-                            if (strpos($poster_path, 'http') === false) {
-                                // Ensure leading slash
+                            if (strpos($poster_path, 'http') === false && !empty($poster_path)) {
                                 if ($poster_path[0] !== '/') {
                                     $poster_path = '/' . $poster_path;
                                 }
@@ -197,10 +196,17 @@ if (empty($marquee_movies)) {
                             }
                         ?>
                             <div class="movie-glass-card">
-                                <img src="<?php echo htmlspecialchars($poster); ?>"
-                                     alt="<?php echo htmlspecialchars($movie['title']); ?>"
-                                     loading="lazy"
-                                     onerror="this.parentElement.style.background='#1a1a1a'; this.style.opacity='0';">
+                                <div class="fallback-title">
+                                    <i class="bi bi-film mb-3 d-block"></i>
+                                    <span class="movie-name"><?php echo htmlspecialchars($title); ?></span>
+                                </div>
+                                <?php if (!empty($poster_path)): ?>
+                                    <img src="<?php echo htmlspecialchars($poster); ?>"
+                                         alt="<?php echo htmlspecialchars($title); ?>"
+                                         loading="lazy"
+                                         onload="this.classList.add('loaded')"
+                                         onerror="this.style.display='none'">
+                                <?php endif; ?>
                                 <div class="glass-overlay"></div>
                             </div>
                         <?php endforeach; ?>

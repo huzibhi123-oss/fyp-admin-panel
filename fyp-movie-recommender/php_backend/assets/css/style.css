@@ -90,7 +90,7 @@ main {
 .premium-card {
     background: var(--bg-card);
     border: var(--border-thin);
-    border-radius: 4px;
+    border-radius: 24px;
     padding: 30px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     height: 100%;
@@ -101,15 +101,19 @@ main {
 .premium-card:hover {
     border-color: var(--accent-red);
     background: var(--accent-red);
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(255, 0, 0, 0.3);
+    transform: translateY(-10px);
+    box-shadow: 0 25px 50px -12px rgba(255, 0, 0, 0.5);
 }
 
+.premium-card:hover h1,
+.premium-card:hover h2,
 .premium-card:hover h3,
 .premium-card:hover h4,
 .premium-card:hover h5,
 .premium-card:hover p,
+.premium-card:hover i,
 .premium-card:hover .text-muted,
+.premium-card:hover .text-danger,
 .premium-card:hover .premium-icon,
 .premium-card:hover .number-highlight {
     color: var(--text-white) !important;
@@ -118,6 +122,18 @@ main {
 .premium-card:hover .badge {
     border-color: var(--text-white) !important;
     color: var(--text-white) !important;
+}
+
+.premium-card:hover .btn-premium {
+    background: var(--text-white);
+    color: var(--accent-red);
+    border-color: var(--text-white);
+}
+
+.premium-card:hover .btn-premium:hover {
+    background: transparent;
+    color: var(--text-white);
+    border-color: var(--text-white);
 }
 
 .premium-icon {

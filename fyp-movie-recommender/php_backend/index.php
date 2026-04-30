@@ -94,7 +94,7 @@ if (empty($marquee_movies)) {
                         <!-- Decorative small icons -->
                         <i class="bi bi-star-fill decorative-icon icon-1"></i>
                         <i class="bi bi-film decorative-icon icon-2"></i>
-                        <i class="bi bi-heart-fill decorative-icon icon-3"></i>
+                        <i class="bi bi-cpu-fill decorative-icon icon-3"></i>
                         <i class="bi bi-play-circle-fill decorative-icon icon-4"></i>
 
                         <!-- Large Main Icon -->
@@ -275,7 +275,7 @@ if (empty($marquee_movies)) {
                         </div>
                     </div>
                     <div class="col-lg-5 text-center d-none d-lg-block">
-                        <i class="bi bi-suit-heart-fill" style="font-size: 10rem; color: #3D0000; opacity: 0.5;"></i>
+                        <i class="bi bi-shield-lock-fill" style="font-size: 10rem; color: #3D0000; opacity: 0.5;"></i>
                     </div>
                 </div>
             </div>

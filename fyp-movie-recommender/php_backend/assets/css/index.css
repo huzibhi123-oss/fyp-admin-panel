@@ -285,7 +285,7 @@ section {
 .marquee-content {
     display: flex;
     gap: 30px;
-    padding: 40px 0;
+    padding: 60px 0; /* Increased vertical padding for hover bounce/shadows */
     width: max-content;
 }
 
@@ -329,14 +329,18 @@ section {
 }
 
 .movie-glass-card img {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
     transition: transform 0.6s ease, opacity 0.5s ease;
-    position: relative;
     z-index: 2;
     display: block;
     opacity: 0;
+    pointer-events: none; /* Let clicks pass through to the card */
 }
 
 .movie-glass-card img.loaded {

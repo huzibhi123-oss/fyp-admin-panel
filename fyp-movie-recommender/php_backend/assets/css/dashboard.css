@@ -36,16 +36,10 @@
     color: var(--accent-red);
 }
 
-/* --- Hero Section --- */
-.dashboard-hero {
-    padding: 40px 0;
-    margin-bottom: 50px;
-}
-
-.hero-title {
-    font-size: 3rem;
-    font-weight: 800;
-    letter-spacing: -1px;
+/* --- Hero Section Overrides --- */
+.dashboard-hero-section {
+    padding: 20px 0 80px !important;
+    margin-top: 0 !important;
 }
 
 .premium-card p.text-muted {

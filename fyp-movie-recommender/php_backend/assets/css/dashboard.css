@@ -4,7 +4,7 @@
 .stats-bar {
     background: #050505;
     border: var(--border-thin);
-    border-radius: 4px;
+    border-radius: 24px;
     padding: 15px 0;
     margin: 30px 0 50px 0;
 }
@@ -57,16 +57,24 @@
 .recent-item {
     background: #0c0c0c;
     border: var(--border-thin);
-    border-radius: 4px;
+    border-radius: 24px;
     padding: 15px;
     margin-bottom: 10px;
     display: flex;
     align-items: center;
-    transition: border-color 0.3s;
+    transition: all 0.3s;
 }
 
 .recent-item:hover {
     border-color: var(--accent-red);
+    background: var(--accent-red);
+    transform: translateY(-5px);
+}
+
+.recent-item:hover h6,
+.recent-item:hover p {
+    color: var(--text-white) !important;
+    opacity: 1;
 }
 
 .recent-card {

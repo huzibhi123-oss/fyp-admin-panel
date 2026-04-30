@@ -124,13 +124,19 @@ main {
     color: var(--text-white) !important;
 }
 
-.premium-card:hover .btn-premium {
+.premium-card:hover .section-tag {
+    opacity: 0;
+}
+
+.premium-card:hover .btn-premium,
+.premium-card:hover .btn-outline-premium {
     background: var(--text-white);
     color: var(--accent-red);
     border-color: var(--text-white);
 }
 
-.premium-card:hover .btn-premium:hover {
+.premium-card:hover .btn-premium:hover,
+.premium-card:hover .btn-outline-premium:hover {
     background: transparent;
     color: var(--text-white);
     border-color: var(--text-white);

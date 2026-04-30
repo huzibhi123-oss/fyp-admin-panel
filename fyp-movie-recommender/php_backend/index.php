@@ -15,7 +15,7 @@ if (file_exists('includes/config.php')) {
                 DB_PASS,
                 [PDO::ATTR_TIMEOUT => 2]
             );
-            $stmt = $pdo_marquee->prepare("SELECT poster_path, title FROM catched_movies ORDER BY RAND() LIMIT 20");
+            $stmt = $pdo_marquee->prepare("SELECT poster_path, title FROM cached_movies ORDER BY RAND() LIMIT 20");
             $stmt->execute();
             $marquee_movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {

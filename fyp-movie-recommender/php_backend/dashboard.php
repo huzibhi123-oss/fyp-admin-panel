@@ -28,25 +28,10 @@ try {
     $stmt->execute(['uid' => $user_id]);
     $recent_activity = $stmt->fetchAll();
 
-    // Fetch a random spotlight movie
-    $stmt = $pdo->prepare("SELECT title, overview, poster_path FROM catched_movies ORDER BY RAND() LIMIT 1");
-    $stmt->execute();
-    $spotlight_movie = $stmt->fetch(PDO::FETCH_ASSOC);
-
 } catch (Exception $e) {
     $total_detections = 0;
     $total_favorites = 0;
     $recent_activity = [];
-    $spotlight_movie = null;
-}
-
-// Fallback for spotlight movie
-if (!$spotlight_movie) {
-    $spotlight_movie = [
-        'title' => 'Top Gun: Maverick',
-        'overview' => 'After more than thirty years of service as one of the Navy\'s top aviators, Pete Mitchell is where he belongs, pushing the envelope as a courageous test pilot.',
-        'poster_path' => '/62HCnUTziyWcpDaBO2i1DX17ljH.jpg'
-    ];
 }
 
 require_once 'includes/header.php';
@@ -54,32 +39,10 @@ set_page_title("MoodAI | Your Dashboard");
 ?>
 <link rel="stylesheet" href="assets/css/dashboard.css">
 
-<!-- Stats Bar -->
-<div class="stats-bar" data-aos="fade-down">
-    <div class="container d-flex align-items-center overflow-auto">
-        <div class="stat-item">
-            <div class="stat-label">System Status</div>
-            <div class="stat-value"><span>ACTIVE</span></div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-label">Mood Scans</div>
-            <div class="stat-value"><?php echo number_format($total_detections); ?></div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-label">Favorites</div>
-            <div class="stat-value"><?php echo number_format($total_favorites); ?></div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-label">Access</div>
-            <div class="stat-value">AUTHORIZED</div>
-        </div>
-    </div>
-</div>
-
 <main class="container pb-5 mb-5 fade-in-section">
 
-    <!-- Hero Section -->
-    <section class="hero-section dashboard-hero-section mb-5">
+    <!-- Hero Section (AI Command Center) -->
+    <section class="hero-section dashboard-hero-section mb-4">
         <div class="container px-0">
             <div class="hero-card" data-aos="zoom-in">
                 <div class="row align-items-center p-5">
@@ -90,41 +53,48 @@ set_page_title("MoodAI | Your Dashboard");
                         <i class="bi bi-cpu-fill decorative-icon icon-3"></i>
                         <i class="bi bi-play-circle-fill decorative-icon icon-4"></i>
 
-                        <!-- Large Main Icon / Movie Poster -->
+                        <!-- Large Main Tech Icon -->
                         <div class="large-hero-icon">
-                            <?php
-                            $poster_path = $spotlight_movie['poster_path'] ?? '';
-                            if (!empty($poster_path)):
-                                if (strpos($poster_path, 'http') === false) {
-                                    if ($poster_path[0] !== '/') $poster_path = '/' . $poster_path;
-                                    $poster_url = "https://image.tmdb.org/t/p/w500" . $poster_path;
-                                } else {
-                                    $poster_url = $poster_path;
-                                }
-                            ?>
-                                <img src="<?php echo htmlspecialchars($poster_url); ?>"
-                                     alt="Spotlight"
-                                     style="width: 250px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1);">
-                            <?php else: ?>
-                                <i class="bi bi-camera-reels"></i>
-                            <?php endif; ?>
+                            <i class="bi bi-cpu"></i>
                         </div>
                     </div>
                     <div class="col-lg-7 hero-content ps-lg-5" data-aos="fade-left">
-                        <span class="section-tag hero-tag">Movie Spotlight</span>
-                        <h1 class="hero-title-text" style="font-size: 3.5rem;"><?php echo htmlspecialchars($spotlight_movie['title']); ?></h1>
-                        <p class="lead hero-lead mb-5" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                            <?php echo htmlspecialchars($spotlight_movie['overview']); ?>
+                        <span class="section-tag hero-tag">System Status: Active</span>
+                        <h1 class="hero-title-text">Welcome back,<br><?php echo htmlspecialchars($user_name); ?>.</h1>
+                        <p class="lead hero-lead mb-5">
+                            Your personal AI Command Center is online. All neural patterns are synchronized and ready for high-fidelity movie discovery.
                         </p>
-                        <div class="d-flex align-items-center">
-                            <a href="recommendation.php" class="btn btn-hero-primary btn-lg me-3">Discover More</a>
-                            <span class="text-white opacity-75 small">Welcome back, <strong><?php echo htmlspecialchars($user_name); ?></strong></span>
+                        <div class="d-flex">
+                            <a href="mood_face.php" class="btn btn-hero-primary btn-lg me-3">Start Analysis</a>
+                            <a href="history.php" class="btn btn-hero-outline btn-lg">View Intelligence</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar mb-5" data-aos="fade-up">
+        <div class="container d-flex align-items-center justify-content-between overflow-auto py-2">
+            <div class="stat-item border-0">
+                <div class="stat-label">Neural Scans</div>
+                <div class="stat-value text-bright-red"><?php echo number_format($total_detections); ?></div>
+            </div>
+            <div class="stat-item border-0">
+                <div class="stat-label">Saved Intelligence</div>
+                <div class="stat-value text-bright-red"><?php echo number_format($total_favorites); ?></div>
+            </div>
+            <div class="stat-item border-0">
+                <div class="stat-label">Core Version</div>
+                <div class="stat-value">v2.4.0</div>
+            </div>
+            <div class="stat-item border-0">
+                <div class="stat-label">Security</div>
+                <div class="stat-value text-success">ENCRYPTED</div>
+            </div>
+        </div>
+    </div>
 
     <div class="row g-5 align-items-stretch">
         <!-- Detection Methods -->

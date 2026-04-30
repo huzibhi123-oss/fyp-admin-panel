@@ -40,8 +40,8 @@
 
 /* --- Hero Section Overrides --- */
 .dashboard-hero-section {
-    padding: 20px 0 80px !important;
-    margin-top: 0 !important;
+    padding: 0;
+    margin-top: 0;
 }
 
 .premium-card p.text-muted {

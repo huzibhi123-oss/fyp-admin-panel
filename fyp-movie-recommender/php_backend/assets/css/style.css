@@ -42,6 +42,7 @@ main {
     padding: 1rem 0;
     backdrop-filter: blur(10px);
     transition: all 0.3s ease;
+    z-index: 1050; /* Ensure navbar is always on top */
 }
 
 .navbar-brand {
@@ -511,11 +512,11 @@ main {
 
 /* --- Hero Section (Shared) --- */
 .hero-section {
-    padding: 100px 0 80px;
-    min-height: 60vh;
+    padding: 40px 0;
+    min-height: auto;
     display: flex;
     align-items: center;
-    margin-top: 40px; /* Distance from header */
+    margin-top: 50px; /* Clear header */
 }
 
 .hero-card {

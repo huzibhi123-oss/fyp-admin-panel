@@ -28,8 +28,13 @@ $recommended_movies = [];
 $api_error = null;
 $data_source = "Live Cloud";
 
-// Fetch Admin Settings
-$settings = $pdo->query("SELECT * FROM admin_settings")->fetchAll(PDO::FETCH_KEY_PAIR);
+// Fetch Admin Settings (with fallback for missing table)
+try {
+    $settings = $pdo->query("SELECT * FROM admin_settings")->fetchAll(PDO::FETCH_KEY_PAIR);
+} catch (Exception $e) {
+    $settings = [];
+}
+
 $limit = (int)($settings['recommendation_count'] ?? 10);
 $logic = $settings['recommendation_logic'] ?? 'top-rated';
 

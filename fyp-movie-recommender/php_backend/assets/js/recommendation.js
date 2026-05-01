@@ -29,18 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.animationDelay = `${0.05 * index}s`;
             card.style.opacity = '1';
         });
-
-        // Neural Vibe Stats Animation
-        document.querySelectorAll('.vibe-stat-item').forEach((stat, index) => {
-            stat.style.opacity = '0';
-            stat.style.transform = 'translateX(-10px)';
-            stat.style.transition = 'all 0.6s ease';
-            
-            setTimeout(() => {
-                stat.style.opacity = '1';
-                stat.style.transform = 'translateX(0)';
-            }, 500 + (index * 200));
-        });
     }
 
     // --- 2. Handle Add to Favorites (AJAX/Fetch) ---

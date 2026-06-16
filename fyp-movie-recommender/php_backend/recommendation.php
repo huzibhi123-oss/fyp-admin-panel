@@ -28,8 +28,13 @@ $recommended_movies = [];
 $api_error = null;
 $data_source = "Live Cloud";
 
-// Fetch Admin Settings
-$settings = $pdo->query("SELECT * FROM admin_settings")->fetchAll(PDO::FETCH_KEY_PAIR);
+// Fetch Admin Settings (with fallback for missing table)
+try {
+    $settings = $pdo->query("SELECT * FROM admin_settings")->fetchAll(PDO::FETCH_KEY_PAIR);
+} catch (Exception $e) {
+    $settings = [];
+}
+
 $limit = (int)($settings['recommendation_count'] ?? 10);
 $logic = $settings['recommendation_logic'] ?? 'top-rated';
 
@@ -184,6 +189,35 @@ if (count($recommended_movies) > $limit) {
     $recommended_movies = array_slice($recommended_movies, 0, $limit);
 }
 
+// --- Prepare Stats ---
+$movie_count = count($recommended_movies);
+$avg_score = $movie_count > 0 ? round(array_sum(array_column($recommended_movies, 'vote_average')) / $movie_count, 1) : 0;
+
+// Mood Emoji Map
+$mood_emojis = [
+    'Happy' => '😊',
+    'Sad' => '😢',
+    'Angry' => '😠',
+    'Excited' => '🤩',
+    'Anxious' => '😰',
+    'Relaxed' => '😌',
+    'Neutral' => '😐',
+    'Default' => '🤔'
+];
+$current_emoji = $mood_emojis[ucfirst(strtolower($last_detected_mood))] ?? $mood_emojis['Default'];
+
+// Genre Name Map
+$genre_names = [
+    35 => 'Comedy',
+    18 => 'Drama',
+    28 => 'Action',
+    10751 => 'Family',
+    53 => 'Thriller',
+    10749 => 'Romance',
+    10752 => 'War'
+];
+$current_genre_name = $genre_names[$target_genre_id] ?? 'Movie';
+
 // --- Include UI Components ---
 require_once 'includes/header.php';
 set_page_title("Recommended Movies - MoodAI Rec.");
@@ -191,150 +225,218 @@ set_page_title("Recommended Movies - MoodAI Rec.");
 
 <link rel="stylesheet" href="assets/css/recommendation.css">
 
-<main class="container pb-5 fade-in-section">
+<main class="container-fluid px-0 pb-5 fade-in-section">
 
-    <!-- Interface Header -->
-    <header class="hero-section-premium mb-5 overflow-hidden position-relative" data-aos="fade-down">
-        <!-- Scan Line Animation -->
-        <div class="header-scan-line"></div>
+    <!-- New Full-Width Hero Section -->
+    <section class="hero-premium-v2 position-relative overflow-hidden">
+        <!-- Background Elements -->
+        <div class="hero-grid-pattern"></div>
+        <div class="hero-radial-glow"></div>
+        <div class="hero-scan-line-horizontal"></div>
 
-        <div class="row align-items-center g-4 position-relative" style="z-index: 2;">
-            <div class="col-lg-8 text-center text-lg-start">
-                <span class="interface-tag animate-reveal">Recommended for You</span>
-                <h1 class="display-4 fw-800 animate-reveal mb-2">Movies for your <?php echo strtolower($last_detected_mood); ?> mood</h1>
-                <p class="text-muted lead animate-reveal">We've found the perfect movies matching how you feel right now.</p>
-            </div>
-            
-            <div class="col-lg-4">
-                <div class="d-flex justify-content-center justify-content-lg-end">
-                    <a href="dashboard.php" class="btn btn-back-tech">
-                        <i class="bi bi-arrow-repeat me-2"></i> TRY ANOTHER MOOD
+        <div class="container py-5 position-relative" style="z-index: 5;">
+            <div class="row align-items-center g-5">
+                <!-- Left Side: Content -->
+                <div class="col-lg-7" data-aos="fade-right">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="pulsing-dot me-2"></div>
+                        <span class="pill-tag">RECOMMENDED FOR YOU</span>
+                    </div>
+
+                    <h1 class="hero-title-v2 mb-3">
+                        Films for your <span class="text-accent-red"><?php echo ucfirst(strtolower($last_detected_mood)); ?></span> mood
+                    </h1>
+
+                    <p class="hero-subtitle-v2 mb-4">
+                        <?php echo $movie_count; ?> titles matched to your emotional frequency
+                    </p>
+
+                    <div class="hero-stats-row mb-5">
+                        <div class="stat-chip">
+                            <span class="stat-value"><?php echo $movie_count; ?></span>
+                            <span class="stat-label">Films</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-chip">
+                            <span class="stat-value"><?php echo $avg_score; ?></span>
+                            <span class="stat-label">Avg Score</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-chip">
+                            <span class="stat-value"><?php echo strtoupper($data_source === 'Live Cloud' ? 'Live' : 'Local'); ?></span>
+                            <span class="stat-label">Source</span>
+                        </div>
+                    </div>
+
+                    <a href="dashboard.php" class="btn btn-try-again">
+                        TRY ANOTHER MOOD
                     </a>
+                </div>
+
+                <!-- Right Side: Mood Visual -->
+                <div class="col-lg-5 text-center" data-aos="fade-left">
+                    <div class="mood-orb-container">
+                        <div class="mood-orb">
+                            <div class="mood-emoji"><?php echo $current_emoji; ?></div>
+                            <div class="orb-glow"></div>
+                        </div>
+                        <div class="mood-label-v2"><?php echo strtoupper($last_detected_mood); ?></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </header>
 
-    <!-- Enhanced Filter Interface (Glassmorphism) -->
-    <section class="filter-section-premium mb-5" data-aos="fade-up">
-        <div class="row g-3">
-            <!-- Region Filter -->
-            <div class="col-lg-8">
-                <div class="filter-glass-bar d-flex justify-content-between align-items-center px-4 py-3 h-100">
-                    <div class="filter-label">
-                        <i class="bi bi-globe me-2" style="color: var(--accent-red);"></i>
-                        Choose Region
-                    </div>
-                    <div class="filter-options d-flex gap-2 flex-wrap justify-content-end">
-                        <a href="?region=Hollywood&sort=<?php echo $current_sort; ?>" class="filter-btn <?php echo $current_region === 'Hollywood' ? 'active' : ''; ?>">Hollywood</a>
-                        <a href="?region=Bollywood&sort=<?php echo $current_sort; ?>" class="filter-btn <?php echo $current_region === 'Bollywood' ? 'active' : ''; ?>">Bollywood</a>
-                        <a href="?region=South Indian&sort=<?php echo $current_sort; ?>" class="filter-btn <?php echo $current_region === 'South Indian' ? 'active' : ''; ?>">South India</a>
-                        <a href="?region=International&sort=<?php echo $current_sort; ?>" class="filter-btn <?php echo $current_region === 'International' ? 'active' : ''; ?>">International</a>
-                    </div>
-                </div>
-            </div>
-            <!-- Sort Filter -->
-            <div class="col-lg-4">
-                <div class="filter-glass-bar d-flex justify-content-between align-items-center px-4 py-3 h-100">
-                    <div class="filter-label">
-                        <i class="bi bi-sort-down me-2" style="color: var(--accent-red);"></i>
-                        Sort By
-                    </div>
-                    <div class="filter-options d-flex gap-2">
-                        <a href="?region=<?php echo urlencode($current_region); ?>&sort=popularity.desc" class="filter-btn <?php echo $current_sort === 'popularity.desc' ? 'active' : ''; ?>">Popular</a>
-                        <a href="?region=<?php echo urlencode($current_region); ?>&sort=vote_average.desc" class="filter-btn <?php echo $current_sort === 'vote_average.desc' ? 'active' : ''; ?>">Rating</a>
-                    </div>
+        <!-- Bottom Hero Bar -->
+        <div class="hero-bottom-bar">
+            <div class="container d-flex justify-content-between align-items-center h-100">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0">
+                        <li class="breadcrumb-item">Dashboard</li>
+                        <li class="breadcrumb-item">Mood Detection</li>
+                        <li class="breadcrumb-item active text-accent-red">Recommendations</li>
+                    </ol>
+                </nav>
+                <div class="detection-info">
+                    Detection via: <span class="text-white"><?php echo ucfirst($detection_method ?? 'Unknown'); ?> Analysis</span>
                 </div>
             </div>
         </div>
     </section>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-12">
-
-            <?php if ($api_error): ?>
-                <div class="alert alert-system text-center py-4 mb-5" data-aos="zoom-in">
-                    <i class="bi bi-exclamation-triangle-fill mb-2 d-block" style="font-size: 2rem;"></i>
-                    <h5 class="fw-bold">SYSTEM ERROR</h5>
-                    <p class="mb-0 small"><?php echo htmlspecialchars($api_error); ?></p>
+    <div class="container mt-5">
+        <!-- Enhanced Filter Interface (Glassmorphism) -->
+        <section class="filter-section-premium mb-5" data-aos="fade-up">
+            <div class="row g-3">
+                <!-- Region Filter -->
+                <div class="col-lg-8">
+                    <div class="filter-glass-bar d-flex justify-content-between align-items-center px-4 py-3 h-100">
+                        <div class="filter-label">
+                            <i class="bi bi-globe me-2" style="color: var(--accent-red);"></i>
+                            Choose Region
+                        </div>
+                        <div class="filter-options d-flex gap-2 flex-wrap justify-content-end">
+                            <a href="?region=Hollywood&sort=<?php echo $current_sort; ?>" class="filter-btn <?php echo $current_region === 'Hollywood' ? 'active' : ''; ?>">Hollywood</a>
+                            <a href="?region=Bollywood&sort=<?php echo $current_sort; ?>" class="filter-btn <?php echo $current_region === 'Bollywood' ? 'active' : ''; ?>">Bollywood</a>
+                            <a href="?region=South Indian&sort=<?php echo $current_sort; ?>" class="filter-btn <?php echo $current_region === 'South Indian' ? 'active' : ''; ?>">South India</a>
+                            <a href="?region=International&sort=<?php echo $current_sort; ?>" class="filter-btn <?php echo $current_region === 'International' ? 'active' : ''; ?>">International</a>
+                        </div>
+                    </div>
                 </div>
-            <?php endif; ?>
-
-            <?php if (empty($recommended_movies)): ?>
-                <div class="alert alert-system text-center py-5" data-aos="zoom-in">
-                    <i class="bi bi-search display-4 mb-3 d-block"></i>
-                    <h4 class="fw-bold">NO MOVIES FOUND</h4>
-                    <p class="mb-0 small">We couldn't find any movies matching your mood at the moment.</p>
+                <!-- Sort Filter -->
+                <div class="col-lg-4">
+                    <div class="filter-glass-bar d-flex justify-content-between align-items-center px-4 py-3 h-100">
+                        <div class="filter-label">
+                            <i class="bi bi-sort-down me-2" style="color: var(--accent-red);"></i>
+                            Sort By
+                        </div>
+                        <div class="filter-options d-flex gap-2">
+                            <a href="?region=<?php echo urlencode($current_region); ?>&sort=popularity.desc" class="filter-btn <?php echo $current_sort === 'popularity.desc' ? 'active' : ''; ?>">Popular</a>
+                            <a href="?region=<?php echo urlencode($current_region); ?>&sort=vote_average.desc" class="filter-btn <?php echo $current_sort === 'vote_average.desc' ? 'active' : ''; ?>">Rating</a>
+                        </div>
+                    </div>
                 </div>
-            <?php else: ?>
+            </div>
 
-                <div class="d-flex justify-content-between align-items-center mb-4 px-2" data-aos="fade-right">
-                    <h5 class="fw-bold text-white mb-0" style="letter-spacing: 2px;">RECOMMENDED MOVIES</h5>
-                    <span class="text-muted small" style="font-family: 'Inter', sans-serif;">
-                        Source: <?php echo $data_source === 'Live Cloud' ? '<span class="text-success">Live Cloud</span>' : '<span class="text-warning">Local Intelligence</span>'; ?>
-                    </span>
+            <!-- Active Filter Tag -->
+            <div class="d-flex justify-content-end mt-3">
+                <div class="active-filter-tag">
+                    <i class="bi bi-funnel-fill me-2"></i>
+                    <?php echo $current_region; ?> <span class="mx-2">·</span> <?php echo $current_sort === 'popularity.desc' ? 'Popular' : 'Top Rated'; ?>
                 </div>
+            </div>
+        </section>
 
-                <div id="movieGrid" class="row g-4 movie-grid">
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
 
-                    <?php foreach ($recommended_movies as $index => $movie): ?>
-                        <?php 
-                            $delay = ($index % 8) * 100; 
-                            $match_score = 95 + (rand(0, 40) / 10); // Random score between 95 and 99
-                        ?>
-                        <div class="col-6 col-md-4 col-lg-3 movie-card-col" data-movie-id="<?php echo htmlspecialchars($movie['id']); ?>" data-aos="fade-up" data-aos-delay="<?php echo $delay; ?>">
-                            <div class="movie-card">
-                                <!-- Neural Badge -->
-                                <div class="match-score-badge"><?php echo number_format($match_score, 1); ?>% MATCH</div>
+                <?php if ($api_error): ?>
+                    <div class="alert alert-system text-center py-4 mb-5" data-aos="zoom-in">
+                        <i class="bi bi-exclamation-triangle-fill mb-2 d-block" style="font-size: 2rem;"></i>
+                        <h5 class="fw-bold">SYSTEM ERROR</h5>
+                        <p class="mb-0 small"><?php echo htmlspecialchars($api_error); ?></p>
+                    </div>
+                <?php endif; ?>
 
-                                <div class="card-img-top-wrapper">
-                                    <img src="<?php echo htmlspecialchars($movie['poster_path']); ?>"
-                                         class="movie-poster"
-                                         alt="<?php echo htmlspecialchars($movie['title']); ?> Poster"
-                                         loading="lazy"
-                                         onerror="this.src='assets/img/no_poster.jpg';">
-                                    
-                                    <!-- Hover Overlay -->
-                                    <div class="poster-overlay">
-                                        <div class="overlay-content">
-                                            <p class="movie-overview-short"><?php echo htmlspecialchars(mb_strimwidth($movie['overview'], 0, 150, "...")); ?></p>
+                <?php if (empty($recommended_movies)): ?>
+                    <div class="alert alert-system text-center py-5" data-aos="zoom-in">
+                        <i class="bi bi-search display-4 mb-3 d-block"></i>
+                        <h4 class="fw-bold">NO MOVIES FOUND</h4>
+                        <p class="mb-0 small">We couldn't find any movies matching your mood at the moment.</p>
+                    </div>
+                <?php else: ?>
+
+                    <div class="d-flex justify-content-between align-items-center mb-4 px-2" data-aos="fade-right">
+                        <h5 class="fw-bold text-white mb-0" style="letter-spacing: 2px; font-weight: 900;">RECOMMENDED MOVIES</h5>
+                        <span class="text-muted small" style="font-family: 'Inter', sans-serif;">
+                            Source: <?php echo $data_source === 'Live Cloud' ? '<span class="text-success">Live Cloud</span>' : '<span class="text-warning">Local Intelligence</span>'; ?>
+                        </span>
+                    </div>
+
+                    <div id="movieGrid" class="row g-4 movie-grid">
+
+                        <?php foreach ($recommended_movies as $index => $movie): ?>
+                            <?php
+                                $delay = ($index % 8) * 100;
+                                $rating = (float)$movie['vote_average'];
+                                $rating_class = $rating >= 8 ? 'rating-high' : ($rating >= 6 ? 'rating-med' : 'rating-low');
+                            ?>
+                            <div class="col-6 col-md-4 col-lg-3 movie-card-col" data-movie-id="<?php echo htmlspecialchars($movie['id']); ?>" data-aos="fade-up" data-aos-delay="<?php echo $delay; ?>">
+                                <div class="movie-card">
+                                    <!-- Rating Top Bar -->
+                                    <div class="rating-bar <?php echo $rating_class; ?>"></div>
+
+                                    <!-- Genre Tag -->
+                                    <div class="genre-tag-badge"><?php echo strtoupper($current_genre_name); ?></div>
+
+                                    <div class="card-img-top-wrapper">
+                                        <img src="<?php echo htmlspecialchars($movie['poster_path']); ?>"
+                                             class="movie-poster"
+                                             alt="<?php echo htmlspecialchars($movie['title']); ?> Poster"
+                                             loading="lazy"
+                                             onerror="this.src='assets/img/no_poster.jpg';">
+
+                                        <!-- Hover Overlay -->
+                                        <div class="poster-overlay">
+                                            <div class="overlay-content">
+                                                <p class="movie-overview-short"><?php echo htmlspecialchars(mb_strimwidth($movie['overview'], 0, 150, "...")); ?></p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div class="card-body">
-                                    <span class="text-muted" style="font-size: 0.55rem; font-family: 'Inter', sans-serif; letter-spacing: 1px;">Movie ID: #<?php echo str_pad($movie['id'], 6, '0', STR_PAD_LEFT); ?></span>
-                                    <h5 class="movie-title text-truncate" title="<?php echo htmlspecialchars($movie['title']); ?>">
-                                        <?php echo htmlspecialchars($movie['title']); ?>
-                                    </h5>
-                                    
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <span class="rating-tech">
-                                            <i class="bi bi-star-fill me-1"></i> <?php echo number_format($movie['vote_average'], 1); ?>
-                                        </span>
-                                        <span class="status-optimal animate-flicker">MATCHED</span>
+                                    <div class="card-body">
+                                        <span class="text-muted" style="font-size: 0.55rem; font-family: 'Inter', sans-serif; letter-spacing: 1px;">ID: #<?php echo str_pad($movie['id'], 6, '0', STR_PAD_LEFT); ?></span>
+                                        <h5 class="movie-title text-truncate" title="<?php echo htmlspecialchars($movie['title']); ?>">
+                                            <?php echo htmlspecialchars($movie['title']); ?>
+                                        </h5>
+
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="rating-tech">
+                                                <i class="bi bi-star-fill me-1"></i> <?php echo number_format($movie['vote_average'], 1); ?>
+                                            </span>
+                                            <span class="status-optimal animate-flicker">OPTIMAL MATCH</span>
+                                        </div>
+
+                                        <?php if ($is_guest): ?>
+                                            <button class="btn btn-favorite-full" data-bs-toggle="modal" data-bs-target="#registerModal">
+                                                <i class="bi bi-shield-lock me-1"></i> LOGIN TO SAVE
+                                            </button>
+                                        <?php else: ?>
+                                            <button class="btn btn-favorite-full favorite-btn"
+                                                    data-movie-id="<?php echo htmlspecialchars($movie['id']); ?>"
+                                                    data-movie-title="<?php echo htmlspecialchars($movie['title']); ?>"
+                                                    data-movie-poster="<?php echo htmlspecialchars($movie['poster_path']); ?>">
+                                                <i class="bi bi-heart me-1"></i> SAVE TO FAVORITES
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
-
-                                    <?php if ($is_guest): ?>
-                                        <button class="btn btn-sync" data-bs-toggle="modal" data-bs-target="#registerModal">
-                                            <i class="bi bi-shield-lock me-1"></i> LOGIN TO SAVE
-                                        </button>
-                                    <?php else: ?>
-                                        <button class="btn btn-sync favorite-btn"
-                                                data-movie-id="<?php echo htmlspecialchars($movie['id']); ?>"
-                                                data-movie-title="<?php echo htmlspecialchars($movie['title']); ?>"
-                                                data-movie-poster="<?php echo htmlspecialchars($movie['poster_path']); ?>">
-                                            <i class="bi bi-heart me-1"></i> SAVE TO FAVORITES
-                                        </button>
-                                    <?php endif; ?>
                                 </div>
                             </div>
-                        </div>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
 
-                </div>
-            <?php endif; ?>
+                    </div>
+                <?php endif; ?>
 
+            </div>
         </div>
     </div>
 </main>

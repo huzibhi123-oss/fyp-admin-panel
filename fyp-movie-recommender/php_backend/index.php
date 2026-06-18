@@ -1,5 +1,42 @@
 <?php
 // index.php - Premium Redesign for MoodAI Recommendation System
+
+// Fetch movies for the marquee
+$marquee_movies = [];
+
+// Fetch DB config manually to avoid die() in connection.php
+if (file_exists('includes/config.php')) {
+    @include_once 'includes/config.php';
+    if (defined('DB_HOST') && defined('DB_NAME')) {
+        try {
+            $pdo_marquee = new PDO(
+                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+                DB_USER,
+                DB_PASS,
+                [PDO::ATTR_TIMEOUT => 2]
+            );
+            $stmt = $pdo_marquee->prepare("SELECT poster_path, title FROM cached_movies ORDER BY RAND() LIMIT 20");
+            $stmt->execute();
+            $marquee_movies = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $marquee_movies = [];
+        }
+    }
+}
+
+// Fallback if no movies found or DB connection fails
+if (empty($marquee_movies)) {
+    $marquee_movies = [
+        ['title' => 'Top Gun: Maverick', 'poster_path' => '/62HCnUTziyWcpDaBO2i1DX17ljH.jpg'],
+        ['title' => 'Jurassic World Dominion', 'poster_path' => '/kAVRgw7GgK1CfYEJq8ME6EvRIgU.jpg'],
+        ['title' => 'Everything Everywhere All at Once', 'poster_path' => '/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg'],
+        ['title' => 'The Northman', 'poster_path' => '/zhLKlUaF1SEpO58ppHIAyENkwgw.jpg'],
+        ['title' => 'Lightyear', 'poster_path' => '/ox4goZd956BxqJH6iLwhWPL9ct4.jpg'],
+        ['title' => 'Spiderhead', 'poster_path' => '/5hTK0J9SGPLSTFwcbU0ELlJsnAY.jpg'],
+        ['title' => 'Interceptor', 'poster_path' => '/cpWUtkcgRKeauhTyVMjYHxAutp4.jpg'],
+        ['title' => 'Black Adam', 'poster_path' => '/pFlaoHTZeyNkG83vxsAJiGzfSsa.jpg']
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -7,17 +44,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MoodAI | Premium Mood-Based Movie Recommendations</title>
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+
     <!-- CSS Libraries -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/index.css">
@@ -51,27 +88,29 @@
     <!-- Split Hero Section -->
     <section id="home" class="hero-section">
         <div class="container">
-            <div class="row align-items-center">
-                <div class="col-lg-6 hero-content" data-aos="fade-right">
-                    <span class="section-tag">Movies for Your Mood</span>
-                    <h1>Your Emotions,<br>Our AI Tool.</h1>
-                    <p class="lead text-muted mb-5">
-                        Experience a movie journey tailored to you. MoodAI uses smart AI to find the perfect movie for you based on how you feel.
-                    </p>
-                    <div class="d-flex">
-                        <button type="button" class="btn btn-premium btn-lg me-3" data-bs-toggle="modal" data-bs-target="#registerModal">Find My Mood</button>
-                        <a href="#how-it-works" class="btn btn-outline-premium btn-lg">See How it Works</a>
+            <div class="hero-card" data-aos="zoom-in">
+                <div class="row align-items-center p-4">
+                    <div class="col-lg-5 text-center position-relative mb-5 mb-lg-0" data-aos="fade-right">
+                        <!-- Decorative small icons -->
+                        <i class="bi bi-star-fill decorative-icon icon-1"></i>
+                        <i class="bi bi-film decorative-icon icon-2"></i>
+                        <i class="bi bi-cpu-fill decorative-icon icon-3"></i>
+                        <i class="bi bi-play-circle-fill decorative-icon icon-4"></i>
+
+                        <!-- Large Main Icon -->
+                        <div class="large-hero-icon">
+                            <i class="bi bi-camera-reels"></i>
+                        </div>
                     </div>
-                </div>
-                <div class="col-lg-6 mt-5 mt-lg-0" data-aos="fade-left">
-                    <div class="hero-visual p-2">
-                        <div class="dashboard-mockup">
-                            <!-- Abstract Dashboard Elements -->
-                            <div class="mockup-element" style="width: 70%; height: 50%; top: 10%; left: 5%; border-color: #950101;"></div>
-                            <div class="mockup-element" style="width: 20%; height: 30%; bottom: 10%; left: 5%;"></div>
-                            <div class="mockup-element" style="width: 45%; height: 25%; bottom: 10%; right: 5%; border-color: var(--accent-red);"></div>
-                            <div class="mockup-element" style="width: 15%; height: 15%; top: 15%; right: 10%; border-radius: 50%; border-width: 2px;"></div>
-                            <i class="bi bi-cpu text-muted" style="font-size: 5rem; opacity: 0.2;"></i>
+                    <div class="col-lg-7 hero-content ps-lg-5" data-aos="fade-left">
+                        <span class="section-tag hero-tag">Movies for Your Mood</span>
+                        <h1 class="hero-title-text">Your Emotions,<br>Our AI Tool.</h1>
+                        <p class="lead hero-lead mb-5">
+                            Experience a movie journey tailored to you. MoodAI uses smart AI to find the perfect movie for you based on how you feel.
+                        </p>
+                        <div class="d-flex">
+                            <button type="button" class="btn btn-hero-primary btn-lg me-3" data-bs-toggle="modal" data-bs-target="#registerModal">Find My Mood</button>
+                            <a href="#how-it-works" class="btn btn-hero-outline btn-lg">See How it Works</a>
                         </div>
                     </div>
                 </div>
@@ -86,7 +125,7 @@
                 <span class="section-tag">What We Can Do</span>
                 <h2 class="section-title-premium">Smart Mood Tools</h2>
             </div>
-            
+
             <div class="bento-container">
                 <!-- Large Feature -->
                 <div class="bento-1" data-aos="zoom-in">
@@ -125,6 +164,59 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Movie Marquee Section -->
+    <section class="movie-marquee-section py-5 overflow-hidden">
+        <div class="container-fluid px-0">
+            <div class="text-center mb-5">
+                <span class="section-tag">Cinematic Library</span>
+                <h2 class="section-title-premium text-white">Our Curated Collection</h2>
+            </div>
+
+            <?php if (!empty($marquee_movies)): ?>
+                <!-- Single Row Marquee as requested -->
+                <div class="marquee-wrapper">
+                    <div class="marquee-content marquee-left">
+                        <?php
+                        // Duplicate movies to ensure seamless loop
+                        $loop_movies = array_merge($marquee_movies, $marquee_movies);
+                        foreach ($loop_movies as $movie):
+                            $poster_path = $movie['poster_path'] ?? '';
+                            $title = $movie['title'] ?? 'Unknown Movie';
+
+                            if (strpos($poster_path, 'http') === false && !empty($poster_path)) {
+                                if ($poster_path[0] !== '/') {
+                                    $poster_path = '/' . $poster_path;
+                                }
+                                $poster = "https://image.tmdb.org/t/p/w500" . $poster_path;
+                            } else {
+                                $poster = $poster_path;
+                            }
+                        ?>
+                            <div class="movie-glass-card">
+                                <div class="fallback-title">
+                                    <i class="bi bi-film mb-3 d-block"></i>
+                                    <span class="movie-name"><?php echo htmlspecialchars($title); ?></span>
+                                </div>
+                                <?php if (!empty($poster_path)): ?>
+                                    <img src="<?php echo htmlspecialchars($poster); ?>"
+                                         alt="<?php echo htmlspecialchars($title); ?>"
+                                         loading="lazy"
+                                         onload="this.classList.add('loaded')"
+                                         onerror="this.style.display='none'">
+                                <?php endif; ?>
+                                <div class="glass-overlay"></div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="text-center text-muted">
+                    <p>Updating cinematic library...</p>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -183,7 +275,7 @@
                         </div>
                     </div>
                     <div class="col-lg-5 text-center d-none d-lg-block">
-                        <i class="bi bi-suit-heart-fill" style="font-size: 10rem; color: #3D0000; opacity: 0.5;"></i>
+                        <i class="bi bi-shield-lock-fill" style="font-size: 10rem; color: #3D0000; opacity: 0.5;"></i>
                     </div>
                 </div>
             </div>
@@ -227,7 +319,7 @@
                     <div class="text-start mb-4">
                         <h4 class="fw-bold mb-1 logo-text">MoodAI<span>.</span></h4>
                     </div>
-                    
+
                     <h2 class="login-title text-white">Welcome Back</h2>
                     <p class="login-subtitle">Login to get your movie recommendations.</p>
 
@@ -240,14 +332,14 @@
                         <label class="form-label-custom">Email</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-envelope"></i></span>
-                            <input type="email" class="form-control" id="email" name="email" 
+                            <input type="email" class="form-control" id="email" name="email"
                                     placeholder="Email Address" required>
                         </div>
 
                         <label class="form-label-custom">Password</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-lock"></i></span>
-                            <input type="password" class="form-control" id="password" name="password" 
+                            <input type="password" class="form-control" id="password" name="password"
                                     placeholder="Password" required>
                             <button class="toggle-password-btn" type="button" data-target="password">
                                 <i class="bi bi-eye"></i>
@@ -278,7 +370,7 @@
                     <div class="text-start mb-4">
                         <h4 class="fw-bold mb-1 logo-text">MoodAI<span>.</span></h4>
                     </div>
-                    
+
                     <h2 class="register-title text-white">Join Us</h2>
                     <p class="register-subtitle">Create your profile to find movies for your mood.</p>
 
@@ -291,21 +383,21 @@
                         <label class="form-label-custom">Your Name</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-person-circle"></i></span>
-                            <input type="text" class="form-control" id="reg_name" name="name" 
+                            <input type="text" class="form-control" id="reg_name" name="name"
                                     placeholder="Enter your name" required>
                         </div>
-                        
+
                         <label class="form-label-custom">Email Address</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-envelope"></i></span>
-                            <input type="email" class="form-control" id="reg_email" name="email" 
+                            <input type="email" class="form-control" id="reg_email" name="email"
                                     placeholder="Email Address" required>
                         </div>
 
                         <label class="form-label-custom">Password</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-lock"></i></span>
-                            <input type="password" class="form-control" id="reg_password" name="password" 
+                            <input type="password" class="form-control" id="reg_password" name="password"
                                     placeholder="8+ characters" required>
                             <button class="toggle-password-btn" type="button" data-target="reg_password">
                                 <i class="bi bi-eye"></i>
@@ -315,7 +407,7 @@
                         <label class="form-label-custom">Confirm Password</label>
                         <div class="input-group-premium">
                             <span class="input-icon"><i class="bi bi-shield-lock"></i></span>
-                            <input type="password" class="form-control" id="reg_confirm_password" name="confirm_password" 
+                            <input type="password" class="form-control" id="reg_confirm_password" name="confirm_password"
                                     placeholder="Re-enter Password" required>
                             <button class="toggle-password-btn" type="button" data-target="reg_confirm_password">
                                 <i class="bi bi-eye"></i>
@@ -372,20 +464,16 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Automatically log in or show success and switch to login modal
-                    // For now, let's redirect to dashboard if the backend does auto-login, 
-                    // or just redirect to login (which is now a modal, so maybe just show success message)
                     if (data.redirect) {
                         window.location.href = data.redirect;
                     } else {
-                        // Registration successful, show success in login modal and switch
                         const loginAlert = document.getElementById('loginAlert');
                         const loginError = document.getElementById('loginErrorMessage');
-                        
+
                         loginAlert.classList.remove('alert-danger', 'd-none');
                         loginAlert.classList.add('alert-success');
                         loginError.textContent = data.message;
-                        
+
                         bootstrap.Modal.getInstance(document.getElementById('registerModal')).hide();
                         new bootstrap.Modal(document.getElementById('loginModal')).show();
                     }

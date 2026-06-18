@@ -11,56 +11,6 @@ body {
     color: var(--text-muted) !important;
 }
 
-/* --- Hero Section (Split) --- */
-.hero-section {
-    padding: 140px 0 80px;
-    min-height: 80vh;
-    display: flex;
-    align-items: center;
-}
-
-.hero-content h1 {
-    font-size: 4.5rem;
-    font-weight: 800;
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
-}
-
-.hero-visual {
-    position: relative;
-    border: var(--border-accent);
-    background: #050505;
-    border-radius: 8px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-}
-
-.dashboard-mockup {
-    width: 100%;
-    aspect-ratio: 16/10;
-    background: repeating-linear-gradient(
-        0deg,
-        #0a0a0a,
-        #0a0a0a 1px,
-        transparent 1px,
-        transparent 40px
-    ), repeating-linear-gradient(
-        90deg,
-        #0a0a0a,
-        #0a0a0a 1px,
-        transparent 1px,
-        transparent 40px
-    );
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.mockup-element {
-    border: 1px solid var(--maroon);
-    background: rgba(61, 0, 0, 0.1);
-    position: absolute;
-}
 
 /* --- Bento Grid --- */
 .bento-container {
@@ -98,7 +48,7 @@ section {
 .login-modal-content, .register-modal-content {
     background: var(--bg-card);
     border: var(--border-thin);
-    border-radius: 4px;
+    border-radius: 24px;
     position: relative;
     overflow: hidden;
 }
@@ -149,6 +99,168 @@ section {
     background: rgba(255, 0, 0, 0.1);
     color: var(--text-error);
     border-left: 3px solid var(--accent-red);
+}
+
+/* --- Movie Marquee --- */
+.movie-marquee-section {
+    background: linear-gradient(180deg, var(--bg-black) 0%, #050505 50%, var(--bg-black) 100%);
+    padding: 80px 0;
+    min-height: 500px; /* Ensure enough space */
+}
+
+.marquee-wrapper {
+    width: 100%;
+    display: flex;
+    overflow: hidden;
+    user-select: none;
+    background: rgba(255, 255, 255, 0.02);
+    /* Soften the mask to ensure images aren't cut off too early */
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 5%,
+        black 95%,
+        transparent
+    );
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        black 5%,
+        black 95%,
+        transparent
+    );
+}
+
+.marquee-content {
+    display: flex;
+    gap: 30px;
+    padding: 100px 0; /* Increased vertical padding for hover bounce/shadows */
+    width: max-content;
+}
+
+.marquee-left {
+    animation: scrollLeft 80s linear infinite;
+}
+
+.marquee-wrapper:hover .marquee-content {
+    animation-play-state: paused;
+}
+
+@keyframes scrollLeft {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(-50% - 15px)); }
+}
+
+.movie-glass-card {
+    width: 240px;
+    height: 360px;
+    flex-shrink: 0;
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    background: #0a0a0a; /* Dark placeholder */
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.movie-glass-card::after {
+    content: '\F32C'; /* bi-film icon as placeholder */
+    font-family: 'bootstrap-icons';
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.05);
+    position: absolute;
+    z-index: 0;
+}
+
+.movie-glass-card img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.6s ease, opacity 0.5s ease;
+    z-index: 2;
+    display: block;
+    opacity: 0;
+    pointer-events: none; /* Let clicks pass through to the card */
+}
+
+.movie-glass-card img.loaded {
+    opacity: 1;
+}
+
+.fallback-title {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    text-align: center;
+    z-index: 1;
+    color: var(--text-white);
+    transition: opacity 0.3s ease;
+}
+
+.fallback-title i {
+    font-size: 2.5rem;
+    opacity: 0.2;
+    color: var(--accent-red);
+}
+
+.fallback-title .movie-name {
+    font-weight: 800;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    display: block;
+    line-height: 1.4;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    opacity: 0.6;
+}
+
+.movie-glass-card:hover .fallback-title .movie-name {
+    opacity: 1;
+    color: var(--accent-red);
+}
+
+.glass-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(255, 0, 0, 0.1) 100%
+    );
+    pointer-events: none;
+}
+
+.movie-glass-card:hover {
+    transform: translateY(-20px) scale(1.05);
+    border-color: var(--accent-red);
+    background: rgba(255, 0, 0, 0.05);
+    box-shadow: 0 25px 60px rgba(255, 0, 0, 0.3);
+}
+
+.movie-glass-card:hover img {
+    transform: scale(1.1);
+}
+
+.movie-glass-card:hover .glass-overlay {
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(255, 0, 0, 0.3) 100%
+    );
 }
 
 /* --- Footer --- */

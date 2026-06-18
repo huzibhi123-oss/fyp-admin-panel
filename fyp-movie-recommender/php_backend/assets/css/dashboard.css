@@ -2,15 +2,17 @@
 
 /* --- Stats Bar --- */
 .stats-bar {
-    background: #050505;
-    border: var(--border-thin);
-    border-radius: 4px;
-    padding: 15px 0;
-    margin: 30px 0 50px 0;
+    background: rgba(10, 10, 10, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 0, 0, 0.1);
+    border-radius: 30px;
+    padding: 20px 40px;
+    margin: 0 0 50px 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 0, 0, 0.05);
 }
 
 .stat-item {
-    border-right: var(--border-thin);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
     padding: 0 30px;
 }
 
@@ -36,16 +38,10 @@
     color: var(--accent-red);
 }
 
-/* --- Hero Section --- */
-.dashboard-hero {
-    padding: 40px 0;
-    margin-bottom: 50px;
-}
-
-.hero-title {
-    font-size: 3rem;
-    font-weight: 800;
-    letter-spacing: -1px;
+/* --- Hero Section Overrides --- */
+.dashboard-hero-section {
+    padding: 0;
+    margin-top: inherit;
 }
 
 .premium-card p.text-muted {
@@ -57,16 +53,24 @@
 .recent-item {
     background: #0c0c0c;
     border: var(--border-thin);
-    border-radius: 4px;
+    border-radius: 24px;
     padding: 15px;
     margin-bottom: 10px;
     display: flex;
     align-items: center;
-    transition: border-color 0.3s;
+    transition: all 0.3s;
 }
 
 .recent-item:hover {
     border-color: var(--accent-red);
+    background: var(--accent-red);
+    transform: translateY(-5px);
+}
+
+.recent-item:hover h6,
+.recent-item:hover p {
+    color: var(--text-white) !important;
+    opacity: 1;
 }
 
 .recent-card {

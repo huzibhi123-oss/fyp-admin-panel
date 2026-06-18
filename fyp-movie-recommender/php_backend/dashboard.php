@@ -3,8 +3,8 @@
 session_start();
 
 // --- Session Check & User Data Retrieval ---
-$user_name = $_SESSION['username'] ?? 'Operative'; 
-$user_id = $_SESSION['user_id'] ?? null; 
+$user_name = $_SESSION['username'] ?? 'Operative';
+$user_id = $_SESSION['user_id'] ?? null;
 
 if (!$user_id) {
     header("Location: login.php");
@@ -16,17 +16,28 @@ require_once 'database/connection.php';
 
 // Fetch stats for the Overview bar
 try {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM user_mood_history WHERE user_id = :uid");
-    $stmt->execute(['uid' => $user_id]);
-    $total_detections = $stmt->fetchColumn();
+    // If it's a real user, fetch from DB
+    if (!isset($_SESSION['is_guest']) || !$_SESSION['is_guest']) {
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM user_mood_history WHERE user_id = :uid");
+        $stmt->execute(['uid' => $user_id]);
+        $total_detections = $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM user_favorites WHERE user_id = :uid");
-    $stmt->execute(['uid' => $user_id]);
-    $total_favorites = $stmt->fetchColumn();
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM user_favorites WHERE user_id = :uid");
+        $stmt->execute(['uid' => $user_id]);
+        $total_favorites = $stmt->fetchColumn();
 
-    $stmt = $pdo->prepare("SELECT mood as detected_mood, input_type as type, detected_at as created_at FROM user_mood_history WHERE user_id = :uid ORDER BY detected_at DESC LIMIT 3");
-    $stmt->execute(['uid' => $user_id]);
-    $recent_activity = $stmt->fetchAll();
+        $stmt = $pdo->prepare("SELECT mood as detected_mood, input_type as type, detected_at as created_at FROM user_mood_history WHERE user_id = :uid ORDER BY detected_at DESC LIMIT 3");
+    } else {
+        // Guest defaults
+        $total_detections = 0;
+        $total_favorites = 0;
+        $recent_activity = [];
+    }
+
+    if (isset($stmt)) {
+        $stmt->execute(['uid' => $user_id]);
+        $recent_activity = $stmt->fetchAll();
+    }
 
 } catch (Exception $e) {
     $total_detections = 0;
@@ -34,40 +45,67 @@ try {
     $recent_activity = [];
 }
 
-require_once 'includes/header.php'; 
+require_once 'includes/header.php';
 set_page_title("MoodAI | Your Dashboard");
 ?>
 <link rel="stylesheet" href="assets/css/dashboard.css">
 
-<!-- Stats Bar -->
-<div class="stats-bar" data-aos="fade-down">
-    <div class="container d-flex align-items-center overflow-auto">
-        <div class="stat-item">
-            <div class="stat-label">System Status</div>
-            <div class="stat-value"><span>ACTIVE</span></div>
+<main class="container pb-5 mb-5 fade-in-section">
+
+    <!-- Hero Section (AI Command Center) -->
+    <section class="hero-section dashboard-hero-section mb-4">
+        <div class="container px-0">
+            <div class="hero-card" data-aos="zoom-in">
+                <div class="row align-items-center p-4">
+                    <div class="col-lg-5 text-center position-relative mb-5 mb-lg-0" data-aos="fade-right">
+                        <!-- Decorative small icons -->
+                        <i class="bi bi-star-fill decorative-icon icon-1"></i>
+                        <i class="bi bi-film decorative-icon icon-2"></i>
+                        <i class="bi bi-cpu-fill decorative-icon icon-3"></i>
+                        <i class="bi bi-play-circle-fill decorative-icon icon-4"></i>
+
+                        <!-- Large Main Tech Icon -->
+                        <div class="large-hero-icon">
+                            <i class="bi bi-cpu"></i>
+                        </div>
+                    </div>
+                    <div class="col-lg-7 hero-content ps-lg-5" data-aos="fade-left">
+                        <span class="section-tag hero-tag">System Status: Active</span>
+                        <h1 class="hero-title-text">Welcome back,<br><?php echo htmlspecialchars($user_name); ?>.</h1>
+                        <p class="lead hero-lead mb-5">
+                            Your personal AI Command Center is online. All neural patterns are synchronized and ready for high-fidelity movie discovery.
+                        </p>
+                        <div class="d-flex">
+                            <a href="mood_face.php" class="btn btn-hero-primary btn-lg me-3">Start Analysis</a>
+                            <a href="history.php" class="btn btn-hero-outline btn-lg">View Intelligence</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="stat-item">
-            <div class="stat-label">Mood Scans</div>
-            <div class="stat-value"><?php echo number_format($total_detections); ?></div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-label">Favorites</div>
-            <div class="stat-value"><?php echo number_format($total_favorites); ?></div>
-        </div>
-        <div class="stat-item">
-            <div class="stat-label">Access</div>
-            <div class="stat-value">AUTHORIZED</div>
+    </section>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar mb-5" data-aos="fade-up">
+        <div class="container d-flex align-items-center justify-content-between overflow-auto py-2">
+            <div class="stat-item border-0">
+                <div class="stat-label">Neural Scans</div>
+                <div class="stat-value text-bright-red"><?php echo number_format($total_detections); ?></div>
+            </div>
+            <div class="stat-item border-0">
+                <div class="stat-label">Saved Intelligence</div>
+                <div class="stat-value text-bright-red"><?php echo number_format($total_favorites); ?></div>
+            </div>
+            <div class="stat-item border-0">
+                <div class="stat-label">Core Version</div>
+                <div class="stat-value">v2.4.0</div>
+            </div>
+            <div class="stat-item border-0">
+                <div class="stat-label">Security</div>
+                <div class="stat-value text-success">ENCRYPTED</div>
+            </div>
         </div>
     </div>
-</div>
-
-<main class="container pb-5 mb-5 fade-in-section">
-    
-    <!-- Hero -->
-    <section class="dashboard-hero" data-aos="fade-down">
-        <span class="section-tag">System Ready</span>
-        <h1 class="hero-title">Welcome back,<br><?php echo htmlspecialchars($user_name); ?>.</h1>
-    </section>
 
     <div class="row g-5 align-items-stretch">
         <!-- Detection Methods -->
@@ -149,6 +187,6 @@ set_page_title("MoodAI | Your Dashboard");
 
 </main>
 
-<?php 
-require_once 'includes/footer.php'; 
+<?php
+require_once 'includes/footer.php';
 ?>
